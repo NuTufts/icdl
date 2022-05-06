@@ -28,11 +28,12 @@
 // // - LArProperties
 // #include "lardataalg/DetectorInfo/LArPropertiesStandardTestHelpers.h"
 // #include "lardataalg/DetectorInfo/LArPropertiesStandard.h"
-// // - Geometry
-// #include "larcorealg/Geometry/StandaloneGeometrySetup.h"
-// #include "larcorealg/Geometry/GeometryCore.h"
-// #include "icaruscode/Geometry/ChannelMapIcarusAlg.h"
-// // - configuration
+// - Geometry
+#include "larcorealg/Geometry/StandaloneGeometrySetup.h"
+#include "larcorealg/Geometry/GeometryCore.h"
+#include "icarusalg/Geometry/ICARUSChannelMapAlg.h"
+#include "icarusalg/Geometry/LoadStandardICARUSgeometry.h"
+// - configuration
 #include "larcorealg/Geometry/StandaloneBasicSetup.h"
 
 // // gallery/canvas
@@ -72,7 +73,7 @@ int main(int argc, char** argv) {
   fhicl::ParameterSet config = lar::standalone::ParseConfiguration(configFile);
   
   // // set up message facility (always picked from "services.message")
-  // lar::standalone::SetupMessageFacility(config, "galleryAnalysis");
+  lar::standalone::SetupMessageFacility(config, "servicesdemo");
   
   // // configuration from the "analysis" table of the FHiCL configuration file:
   // auto const& analysisConfig = config.get<fhicl::ParameterSet>("analysis");
@@ -85,16 +86,18 @@ int main(int argc, char** argv) {
   // // (and make sure the corresponding headers are also uncommented)
   // //
   
-  // // geometry setup (it's special)
-  // auto geom = lar::standalone::SetupGeometry<geo::ChannelMapIcarusAlg>(config.get<fhicl::ParameterSet>("services.Geometry"));
+  //geometry setup (it's special)
+  auto geom = lar::standalone::SetupGeometry<icarus::ICARUSChannelMapAlg>(config.get<fhicl::ParameterSet>("services.Geometry"));
+  //std::unique_ptr<geo::GeometryCore> geom = icarus::geo::LoadStandardICARUSgeometry("standard_g4_icarus.fcl");
+  //geom->Print(std::cout);
   
-  // // LArProperties setup
-  // auto larp = testing::setupProvider<detinfo::LArPropertiesStandard>(config.get<fhicl::ParameterSet>("services.LArPropertiesService"));
+  // LArProperties setup
+  //auto larp = testing::setupProvider<detinfo::LArPropertiesStandard>(config.get<fhicl::ParameterSet>("services.LArPropertiesService"));
   
-  // // DetectorClocks setup
-  // auto detclk = testing::setupProvider<detinfo::DetectorClocksStandard>(config.get<fhicl::ParameterSet>("services.DetectorClocksService"));
+  // DetectorClocks setup
+  //auto detclk = testing::setupProvider<detinfo::DetectorClocksStandard>(config.get<fhicl::ParameterSet>("services.DetectorClocksService"));
   
-  // // DetectorProperties setup
+  // DetectorProperties setup
   // auto detp = testing::setupProvider<detinfo::DetectorPropertiesStandard>(config.get<fhicl::ParameterSet>("services.DetectorPropertiesService"),
   // 									  detinfo::DetectorPropertiesStandard::providers_type{geom.get(),
   // 									    static_cast<detinfo::LArProperties const*>(larp.get()),

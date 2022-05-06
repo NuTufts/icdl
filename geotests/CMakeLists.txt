@@ -21,7 +21,6 @@ project(gallerydemo CXX)
 
 # dependency hell
 set( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} )
-message( "${CMAKE_MODULE_PATH}" )
 find_package(PkgConfig)
 pkg_check_modules(SQLite3 REQUIRED sqlite3)
 find_package( Boost REQUIRED )
@@ -44,8 +43,9 @@ include_directories( ${messagefacility_INCLUDE_DIRS} )
 include_directories( ${lardataobj_INCLUDE_DIRS} )
 include_directories( ${larcorealg_INCLUDE_DIRS} )
 include_directories( ${larcorealg_INCLUDE_DIRS} )
+include_directories( ${icarusalg_INCLUDE_DIRS} )
 
-set( LINK_LIBS fhiclcpp::fhiclcpp )
+set( LINK_LIBS fhiclcpp::fhiclcpp larcorealg::Geometry icarusalg::Geometry )
 
 #target_link_libraries(demo ${LINK_LIBS} )
 target_link_libraries(servicesdemo ${LINK_LIBS} )
