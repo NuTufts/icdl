@@ -88,6 +88,9 @@ int main(int argc, char** argv) {
   
   //geometry setup (it's special)
   auto geom = lar::standalone::SetupGeometry<icarus::ICARUSChannelMapAlg>(config.get<fhicl::ParameterSet>("services.Geometry"));
+  geom->Print(std::cout);
+  //geom->Info("  ");
+
   //std::unique_ptr<geo::GeometryCore> geom = icarus::geo::LoadStandardICARUSgeometry("standard_g4_icarus.fcl");
   //geom->Print(std::cout);
   
