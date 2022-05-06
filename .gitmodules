@@ -1,0 +1,3 @@
+[submodule "larlite"]
+	path = larlite
+	url = https://github.com/NuTufts/larlite.git
