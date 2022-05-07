@@ -29,14 +29,19 @@ find_package( ROOT REQUIRED )
 set( Range_DIR $CMAKE_CURRENT_SOURCE_DIR )
 find_package( Range )
 find_package( icarusalg REQUIRED QUIET )
+set( larlite_DIR $ENV{LARLITE_LIBDIR}/cmake/larlite )
+find_package( larlite REQUIRED )
+
 
 #add_executable(demo demo.cc analyze.cc)
 add_executable(servicesdemo servicesdemo.cc)
+add_executable(gen_geodata_rootfile gen_geodata_rootfile.cc)
 
 # To set the C++ standard to be used, only one of the following two lines should
 # be un-commented.
 #set_property(TARGET demo PROPERTY CXX_STANDARD 14)
 set_property(TARGET servicesdemo PROPERTY CXX_STANDARD 17)
+set_property(TARGET gen_geodata_rootfile PROPERTY CXX_STANDARD 17)
 
 include_directories( ${fhiclcpp_INCLUDE_DIRS} )
 include_directories( ${messagefacility_INCLUDE_DIRS} )
@@ -44,9 +49,13 @@ include_directories( ${lardataobj_INCLUDE_DIRS} )
 include_directories( ${larcorealg_INCLUDE_DIRS} )
 include_directories( ${larcorealg_INCLUDE_DIRS} )
 include_directories( ${icarusalg_INCLUDE_DIRS} )
+include_directories( ${LARLITE_INCLUDE_DIR} )
 
-set( LINK_LIBS fhiclcpp::fhiclcpp larcorealg::Geometry icarusalg::Geometry )
+message( status "${larlite_INCLUDE_DIRS}" )
+
+set( LINK_LIBS fhiclcpp::fhiclcpp larcorealg::Geometry icarusalg::Geometry larlite_Geometry ${ROOT_LIBRARIES} )
 
 #target_link_libraries(demo ${LINK_LIBS} )
 target_link_libraries(servicesdemo ${LINK_LIBS} )
+target_link_libraries(gen_geodata_rootfile ${LINK_LIBS})
 
