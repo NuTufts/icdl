@@ -190,15 +190,22 @@ int main(int argc, char** argv) {
       } // for plane in a tpc
 
       llcryo.tpc_v.emplace_back( std::move(lltpc) );
+
     } // for TPC
     
-    // unsigned int nOpDets = cryostat.NOpDet();
-    // for (unsigned int iOpDet = 0; iOpDet < nOpDets; ++iOpDet) {
-    //   geo::OpDetGeo const& opDet = cryostat.OpDet(iOpDet);
-    //   std::cout << "\n" << indent << "  [OpDet #" << iOpDet << "] ";
-    //   opDet.PrintOpDetInfo
-    //     (std::forward<Stream>(std::cout), indent + "  ", opDet.MaxVerbosity);
-    // } // for
+    unsigned int nOpDets = cryostat.NOpDet();
+    for (unsigned int iOpDet = 0; iOpDet < nOpDets; ++iOpDet) {
+      geo::OpDetGeo const& opDet = cryostat.OpDet(iOpDet);
+      //   std::cout << "\n" << indent << "  [OpDet #" << iOpDet << "] ";
+      //   opDet.PrintOpDetInfo
+      //     (std::forward<Stream>(std::cout), indent + "  ", opDet.MaxVerbosity);
+      auto opcenter = opDet.GetCenter();
+      larlite::geo::OpDetGeo llgeo( opDet.ID().OpDet, 
+				    cryostat.ID().Cryostat,
+				    TVector3( opcenter.x(), opcenter.y(), opcenter.z() ) );
+
+      llcryo.opdet_v.emplace_back( std::move(llgeo) );				    
+    } // for
 
     cryo_v.push_back( std::move(llcryo) );
   } // for cryostat
