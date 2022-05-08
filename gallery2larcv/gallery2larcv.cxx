@@ -16,6 +16,8 @@
 
 // // gallery/canvas
 #include "fhiclcpp/ParameterSet.h"
+#include "gallery/Event.h"
+#include "messagefacility/MessageLogger/MessageLogger.h"
 
 // ROOT
 #include "TFile.h"
@@ -47,6 +49,24 @@ int main(int argc, char** argv) {
   
   // // set up message facility (always picked from "services.message")
   lar::standalone::SetupMessageFacility(config, "servicesdemo");
+
+  std::vector<std::string> allInputFiles
+    = { "../../testdata/mcc2021b_bnbnu/prodcorsika_bnb_genie_protononly_overburden_icarus_gen_filter_g4_detsim_24027129_667_reco1.root"};
+
+  int numEvents(0);
+  
+  /*
+   * the event loop
+   */
+  for (gallery::Event event(allInputFiles); !event.atEnd(); event.next())
+    {
+      // *************************************************************************
+      // ***  SINGLE EVENT PROCESSING BEGIN  *************************************
+      // *************************************************************************
+      
+      mf::LogVerbatim("gallery2larcv") << "This is event " << event.fileEntry() << "-" << event.eventEntry();
+    }
+
     
   //geometry setup
   //auto geom = lar::standalone::SetupGeometry<icarus::ICARUSChannelMapAlg>(config.get<fhicl::ParameterSet>("services.Geometry"));

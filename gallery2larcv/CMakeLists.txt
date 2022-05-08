@@ -12,6 +12,8 @@ find_package( ROOT REQUIRED )
 set( Range_DIR $CMAKE_CURRENT_SOURCE_DIR )
 find_package( Range )
 find_package( icarusalg REQUIRED QUIET )
+find_package( canvas REQUIRED QUIET )
+find_package( gallery REQUIRED QUIET )
 set( larlite_DIR $ENV{LARLITE_LIBDIR}/cmake/larlite )
 find_package( larlite REQUIRED )
 
@@ -23,6 +25,9 @@ add_executable(gallery2larcv gallery2larcv.cxx)
 set_property(TARGET gallery2larcv PROPERTY CXX_STANDARD 17)
 
 include_directories( ${fhiclcpp_INCLUDE_DIRS} )
+include_directories( ${canvas_INCLUDE_DIRS} )
+include_directories( ${canvas_root_io_INCLUDE_DIRS} )
+include_directories( ${gallery_INCLUDE_DIRS} )
 include_directories( ${messagefacility_INCLUDE_DIRS} )
 include_directories( ${lardataobj_INCLUDE_DIRS} )
 include_directories( ${larcorealg_INCLUDE_DIRS} )
@@ -32,7 +37,7 @@ include_directories( ${LARLITE_INCLUDE_DIR} )
 
 message( status "${larlite_INCLUDE_DIRS}" )
 
-set( LINK_LIBS fhiclcpp::fhiclcpp larcorealg::Geometry icarusalg::Geometry larlite_Geometry ${ROOT_LIBRARIES} )
+set( LINK_LIBS fhiclcpp::fhiclcpp gallery::gallery larcorealg::Geometry icarusalg::Geometry larlite_Geometry ${ROOT_LIBRARIES} )
 
 #target_link_libraries(demo ${LINK_LIBS} )
 target_link_libraries(gallery2larcv ${LINK_LIBS})
