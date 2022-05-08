@@ -16,6 +16,8 @@ find_package( canvas REQUIRED QUIET )
 find_package( gallery REQUIRED QUIET )
 set( larlite_DIR $ENV{LARLITE_LIBDIR}/cmake/larlite )
 find_package( larlite REQUIRED )
+set( larcv_DIR $ENV{LARCV_LIBDIR}/cmake/larcv )
+find_package( larcv REQUIRED )
 
 add_executable(gallery2larcv gallery2larcv.cxx)
 
@@ -34,10 +36,11 @@ include_directories( ${larcorealg_INCLUDE_DIRS} )
 include_directories( ${larcorealg_INCLUDE_DIRS} )
 include_directories( ${icarusalg_INCLUDE_DIRS} )
 include_directories( ${LARLITE_INCLUDE_DIR} )
+include_directories( ${LARCV_INCLUDE_DIR} )
 
 message( status "${larlite_INCLUDE_DIRS}" )
 
-set( LINK_LIBS fhiclcpp::fhiclcpp gallery::gallery larcorealg::Geometry icarusalg::Geometry larlite_Geometry ${ROOT_LIBRARIES} )
+set( LINK_LIBS fhiclcpp::fhiclcpp gallery::gallery canvas::canvas larcorealg::Geometry icarusalg::Geometry lardataobj::RecoBase larlite_Geometry LArCVCoreDataFormat ${ROOT_LIBRARIES} )
 
 #target_link_libraries(demo ${LINK_LIBS} )
 target_link_libraries(gallery2larcv ${LINK_LIBS})
