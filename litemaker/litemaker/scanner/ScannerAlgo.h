@@ -1,4 +1,3 @@
-
 #ifndef SCANNERALGO_H
 #define SCANNERALGO_H
 
@@ -37,7 +36,6 @@
 #include "lardataobj/RecoBase/EndPoint2D.h"
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "lardataobj/RecoBase/PCAxis.h"
-#include "larsim/EventWeight/Base/MCEventWeight.h"
 #include "lardataobj/AnalysisBase/FlashMatch.h"
 #include "lardataobj/AnalysisBase/ParticleID.h"
 #include "lardataobj/AnalysisBase/Calorimetry.h"
@@ -53,9 +51,10 @@
 #include "lardataobj/OpticalDetectorData/OpticalTypes.h"
 #include "lardataobj/MCBase/MCShower.h"
 #include "lardataobj/MCBase/MCTrack.h"
-#include "lardata/DetectorInfoServices/LArPropertiesService.h"
-#include "lardata/Utilities/GeometryUtilities.h"
-#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+/* #include "lardata/DetectorInfoServices/LArPropertiesService.h" */
+/* #include "lardata/Utilities/GeometryUtilities.h" */
+/* #include "lardata/DetectorInfoServices/DetectorPropertiesService.h" */
+//#include "larsim/EventWeight/Base/MCEventWeight.h"
 
 // std 
 #include <vector>
@@ -143,6 +142,12 @@ namespace larlite {
 		  ::larlite::event_base* lite_dh);
 
     /// Core method: convert LArSoft data product (dh) to LArLite (lite_dh)
+    /// dehandle for use with art and gallery
+    template <class T>
+    void ScanData(std::vector<T> const &dh,
+		  ::larlite::event_base* lite_dh);
+
+    /// Core method: convert LArSoft data product (dh) to LArLite (lite_dh)
     template <class T>
     void ScanSimpleData(art::Handle<T> const &dh,
 			::larlite::event_base* lite_dh);
@@ -193,7 +198,7 @@ namespace larlite {
     std::vector< std::vector< std::map< art::Ptr<::raw::RawDigit>,     std::pair<size_t,size_t> > > > fPtrIndex_rawdigit;
     std::vector< std::vector< std::map< art::Ptr<::raw::OpDetWaveform>,std::pair<size_t,size_t> > > > fPtrIndex_opdigit;
     std::vector< std::vector< std::map< art::Ptr<::raw::Trigger>,      std::pair<size_t,size_t> > > > fPtrIndex_trigger;
-    std::vector< std::vector< std::map< art::Ptr<::raw::ubdaqSoftwareTriggerData>, std::pair<size_t,size_t> > > > fPtrIndex_swtrigger;
+    //std::vector< std::vector< std::map< art::Ptr<::raw::ubdaqSoftwareTriggerData>, std::pair<size_t,size_t> > > > fPtrIndex_swtrigger;
     std::vector< std::vector< std::map< art::Ptr<::recob::Wire>,       std::pair<size_t,size_t> > > > fPtrIndex_wire;
     std::vector< std::vector< std::map< art::Ptr<::recob::Hit>,        std::pair<size_t,size_t> > > > fPtrIndex_hit;
     std::vector< std::vector< std::map< art::Ptr<::recob::OpHit>,      std::pair<size_t,size_t> > > > fPtrIndex_ophit;
@@ -211,7 +216,7 @@ namespace larlite {
     std::vector< std::vector< std::map< art::Ptr<::recob::PFParticle>, std::pair<size_t,size_t> > > > fPtrIndex_pfpart;
     std::vector< std::vector< std::map< art::Ptr<::recob::PCAxis>,     std::pair<size_t,size_t> > > > fPtrIndex_pcaxis;
     std::vector< std::vector< std::map< art::Ptr<::anab::FlashMatch>,  std::pair<size_t,size_t> > > > fPtrIndex_fmatch;
-    std::vector< std::vector< std::map< art::Ptr<::evwgh::MCEventWeight>, std::pair<size_t,size_t> > > > fPtrIndex_eventweight;
+    //std::vector< std::vector< std::map< art::Ptr<::evwgh::MCEventWeight>, std::pair<size_t,size_t> > > > fPtrIndex_eventweight;
 
   };
 }

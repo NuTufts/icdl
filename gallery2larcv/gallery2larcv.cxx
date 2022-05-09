@@ -19,12 +19,20 @@
 // // gallery/canvas
 #include "fhiclcpp/ParameterSet.h"
 #include "gallery/Event.h"
+#include "art/Framework/Principal/Handle.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "canvas/Utilities/InputTag.h"
 
 // LARCV
 #include "larcv/core/DataFormat/IOManager.h"
 #include "larcv/core/DataFormat/EventImage2D.h"
+
+// larlite
+#include "larlite/DataFormat/storage_manager.h"
+#include "larlite/DataFormat/mcpart.h"
+
+// litemaker
+#include "litemaker/scanner/ScannerAlgo.h"
 
 // ROOT
 #include "TFile.h"
@@ -61,6 +69,16 @@ int main(int argc, char** argv) {
   //geometry setup
   auto geom = lar::standalone::SetupGeometry<icarus::ICARUSChannelMapAlg>(config.get<fhicl::ParameterSet>("services.Geometry"));
 
+  // litemaker scanner: converts larsoft data products into larlite ones
+  larlite::ScannerAlgo scanner; 
+  scanner.Register( "largeant",  larlite::data::kMCParticle );
+  scanner.Register( "generator", larlite::data::kMCTruth );
+  scanner.Register( "generator", larlite::data::kMCFlux );
+
+  larlite::storage_manager llout( larlite::storage_manager::kWRITE );
+  llout.set_out_filename( "out_larlite.root" );
+  llout.open();
+
   // get parameters needed for image making
   unsigned int max_wires_per_plane   = geom->MaxWires();
   unsigned int max_ticks_per_channel = 4096;
@@ -78,6 +96,7 @@ int main(int argc, char** argv) {
   int numEvents(0);
 
   art::InputTag const wire_tag("roifinder","PHYSCRATEDATATPCEW","MCstage0");
+  art::InputTag const mcparticle_tag("largeant","","G4");
   
   std::cout << "start event loop" << std::endl;
 
@@ -128,16 +147,25 @@ int main(int argc, char** argv) {
 	  int tpcid  = wireid.parentID().parentID().TPC;
 	  int cryoid = wireid.parentID().parentID().parentID().Cryostat;
 	  int lcvplaneid = cryoid*(12) + tpcid*3 + planeid;
-	  std::cout << "  wire (p,t,c)=(" << planeid << "," << tpcid << "," << cryoid << ")" << std::endl;
+	  //std::cout << "  wire (p,t,c)=(" << planeid << "," << tpcid << "," << cryoid << ")" << std::endl;
 	  auto& img = adc_v.at(lcvplaneid);
 	  img.copy( 0, wid, signal, std::min((int)signal.size(),(int)4096) );
 	}
 	//std::cout << "CH " << channel << ": no wires=" << wire_v.size() << std::endl;
       }
-      std::cout << "max signal size: " << nmaxsignal << std::endl;
+      //std::cout << "max signal size: " << nmaxsignal << std::endl;
       
       iolcv.set_id( 0, 0, ientry );
       iolcv.save_entry();
+
+      // larlite products
+      auto pMCParticleVec = event.getValidHandle< std::vector<simb::MCParticle> >(mcparticle_tag);
+      larlite::event_mcpart* ev_mcpart = 
+	(larlite::event_mcpart*)llout.get_data( larlite::data::kMCParticle, "largeant" );
+
+      scanner.ScanData( *pMCParticleVec, ev_mcpart );
+      llout.set_id( 0, 0, ientry );
+      llout.next_event();
       // define a meta
       // we transfer data to image
       // we write output
@@ -148,6 +176,7 @@ int main(int argc, char** argv) {
     
   //geom->Print(std::cout);
   iolcv.finalize();
+  llout.close();
     
   return 0;
 } // main()

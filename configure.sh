@@ -26,9 +26,9 @@ cd $ICDL_BASEDIR
 #cd $ICDL_BASEDIR
 
 # # LArCV
-# cd larcv
-# source configure.sh
-# cd $ICDL_BASEDIR
+cd larcv
+source configure.sh
+cd $ICDL_BASEDIR
 
 # # Cilantro (3rd party)
 # cd cilantro

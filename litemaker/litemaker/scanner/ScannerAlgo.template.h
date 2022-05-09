@@ -4,6 +4,7 @@
 // #include "ubcore/Geometry/UBOpChannelTypes.h"
 // #include "ubcore/Geometry/UBOpReadoutMap.h"
 
+#include "larlite/Base/DataFormatConstants.h"
 #include "larlite/DataFormat/event_ass.h"
 #include "larlite/DataFormat/sparse_vector.h"
 #include "larlite/DataFormat/opdetwaveform.h"
@@ -197,16 +198,19 @@ namespace larlite {
     
   }
 
+  /* template <> */
+  /* void ScannerAlgo::ScanData(art::Handle<std::vector< ::simb::MCParticle> > const &dh, */
+  /* 			     ::larlite::event_base* lite_dh) */
   template <>
-  void ScannerAlgo::ScanData(art::Handle<std::vector< ::simb::MCParticle> > const &dh,
+  void ScannerAlgo::ScanData(std::vector< ::simb::MCParticle> const &dh,
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
     //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_mcpart*)lite_dh;
-    for(size_t i=0; i<dh->size(); ++i) {
+    for(size_t i=0; i<dh.size(); ++i) {
       
-      art::Ptr<::simb::MCParticle> mcparticle_ptr(dh,i);
+      const ::simb::MCParticle* mcparticle_ptr = &dh.at(i);
       
       larlite::mcpart mcpart_lite(mcparticle_ptr->TrackId(),
 				  mcparticle_ptr->PdgCode(),
@@ -557,62 +561,62 @@ namespace larlite {
 
   }
 
-  template <>
-  void ScannerAlgo::ScanData(art::Handle<std::vector< ::MuCS::MuCSData> > const &dh,
-			     ::larlite::event_base* lite_dh)
-  { 
-    fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
-    auto lite_data = (::larlite::event_mucsdata*)lite_dh;
+  /* template <> */
+  /* void ScannerAlgo::ScanData(art::Handle<std::vector< ::MuCS::MuCSData> > const &dh, */
+  /* 			     ::larlite::event_base* lite_dh) */
+  /* {  */
+  /*   fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;   */
+  /*   auto lite_data = (::larlite::event_mucsdata*)lite_dh; */
 
-    for(size_t i=0; i<dh->size(); ++i ) {
+  /*   for(size_t i=0; i<dh->size(); ++i ) { */
       
-      const art::Ptr<::MuCS::MuCSData> mucs_ptr(dh,i);
+  /*     const art::Ptr<::MuCS::MuCSData> mucs_ptr(dh,i); */
       
-      auto adc1 = mucs_ptr->ADC1();
-      auto adc2 = mucs_ptr->ADC2();
-      auto adc3 = mucs_ptr->ADC3();
-      auto adc7 = mucs_ptr->ADC7();
-      auto hits1 = mucs_ptr->Hits1();
-      auto hits2 = mucs_ptr->Hits2();
-      auto hits3 = mucs_ptr->Hits3();
-      auto hits7 = mucs_ptr->Hits7();
+  /*     auto adc1 = mucs_ptr->ADC1(); */
+  /*     auto adc2 = mucs_ptr->ADC2(); */
+  /*     auto adc3 = mucs_ptr->ADC3(); */
+  /*     auto adc7 = mucs_ptr->ADC7(); */
+  /*     auto hits1 = mucs_ptr->Hits1(); */
+  /*     auto hits2 = mucs_ptr->Hits2(); */
+  /*     auto hits3 = mucs_ptr->Hits3(); */
+  /*     auto hits7 = mucs_ptr->Hits7(); */
       
-      larlite::mucsdata lite_mucs( mucs_ptr->T0(), 
-				   &(adc1[0]), &(adc2[0]), &(adc3[0]), &(adc7[0]),
-				   hits1, hits2, hits3, hits7);
+  /*     larlite::mucsdata lite_mucs( mucs_ptr->T0(),  */
+  /* 				   &(adc1[0]), &(adc2[0]), &(adc3[0]), &(adc7[0]), */
+  /* 				   hits1, hits2, hits3, hits7); */
 
-      lite_data->push_back(lite_mucs);
-    }
+  /*     lite_data->push_back(lite_mucs); */
+  /*   } */
 
-  }
+  /* } */
 
-  template <>
-  void ScannerAlgo::ScanData(art::Handle<std::vector< ::MuCS::MuCSRecoData> > const &dh,
-			     ::larlite::event_base* lite_dh)
-  { 
-    fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
-    auto lite_data = (::larlite::event_mucsreco*)lite_dh;
+  /* template <> */
+  /* void ScannerAlgo::ScanData(art::Handle<std::vector< ::MuCS::MuCSRecoData> > const &dh, */
+  /* 			     ::larlite::event_base* lite_dh) */
+  /* {  */
+  /*   fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;   */
+  /*   auto lite_data = (::larlite::event_mucsreco*)lite_dh; */
 
-    for(size_t i=0; i<dh->size(); ++i ) {
+  /*   for(size_t i=0; i<dh->size(); ++i ) { */
       
-      const art::Ptr<::MuCS::MuCSRecoData> mucs_ptr(dh,i);
+  /*     const art::Ptr<::MuCS::MuCSRecoData> mucs_ptr(dh,i); */
 
-      larlite::mucsreco lite_mucs(mucs_ptr->theta_xy(),
-				  mucs_ptr->theta_xy_rms(),
-				  mucs_ptr->x(),
-				  mucs_ptr->x_rms(),
-				  mucs_ptr->theta_yz(),
-				  mucs_ptr->theta_yz_rms(),
-				  mucs_ptr->z(),
-				  mucs_ptr->z_rms(),
-				  mucs_ptr->y(),
-				  mucs_ptr->xmatches(),
-				  mucs_ptr->zmatches());
+  /*     larlite::mucsreco lite_mucs(mucs_ptr->theta_xy(), */
+  /* 				  mucs_ptr->theta_xy_rms(), */
+  /* 				  mucs_ptr->x(), */
+  /* 				  mucs_ptr->x_rms(), */
+  /* 				  mucs_ptr->theta_yz(), */
+  /* 				  mucs_ptr->theta_yz_rms(), */
+  /* 				  mucs_ptr->z(), */
+  /* 				  mucs_ptr->z_rms(), */
+  /* 				  mucs_ptr->y(), */
+  /* 				  mucs_ptr->xmatches(), */
+  /* 				  mucs_ptr->zmatches()); */
 
-      lite_data->push_back(lite_mucs);
-    }
+  /*     lite_data->push_back(lite_mucs); */
+  /*   } */
 
-  }
+  /* } */
 
   template <>
   void ScannerAlgo::ScanData(art::Handle<std::vector< ::raw::RawDigit> > const &dh,
@@ -682,26 +686,26 @@ namespace larlite {
       
     }
 
-  template <>
-  void ScannerAlgo::ScanSimpleData(art::Handle< ::raw::ubdaqSoftwareTriggerData> const &dh,
-				   ::larlite::event_base* lite_dh)
-  { 
+  /* template <> */
+  /* void ScannerAlgo::ScanSimpleData(art::Handle< ::raw::ubdaqSoftwareTriggerData> const &dh, */
+  /* 				   ::larlite::event_base* lite_dh) */
+  /* {  */
       
-      //fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
-      //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
-      auto lite_data = (::larlite::swtrigger*)lite_dh;
+  /*     //fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;   */
+  /*     //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name()); */
+  /*     auto lite_data = (::larlite::swtrigger*)lite_dh; */
       
-      for(size_t i=0; i<(size_t)(dh->getNumberOfAlgorithms()); ++i) {
-	lite_data->addAlgorithm( dh->getTriggerAlgorithm(i),
-				 dh->getPass(i),
-				 dh->getPassPrescale(i),
-				 dh->getPhmax(i),
-				 dh->getMultiplicity(i),
-				 dh->getTriggerTick(i),
-				 dh->getTimeSinceTrigger(i),
-				 dh->getPrescale(i) );
-      }
-    }
+  /*     for(size_t i=0; i<(size_t)(dh->getNumberOfAlgorithms()); ++i) { */
+  /* 	lite_data->addAlgorithm( dh->getTriggerAlgorithm(i), */
+  /* 				 dh->getPass(i), */
+  /* 				 dh->getPassPrescale(i), */
+  /* 				 dh->getPhmax(i), */
+  /* 				 dh->getMultiplicity(i), */
+  /* 				 dh->getTriggerTick(i), */
+  /* 				 dh->getTimeSinceTrigger(i), */
+  /* 				 dh->getPrescale(i) ); */
+  /*     } */
+  /*   } */
   
   template <>
   void ScannerAlgo::ScanData(art::Handle<std::vector< ::recob::Wire> > const &dh,
@@ -737,7 +741,7 @@ namespace larlite {
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;
     //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());    
     auto lite_data = (::larlite::event_hit*)lite_dh;
-    art::ServiceHandle<::geo::Geometry> geo;
+    //art::ServiceHandle<::geo::Geometry> geo;
 
     for(size_t i=0; i<dh->size(); i++){
       
@@ -806,53 +810,55 @@ namespace larlite {
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
     //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_opflash*)lite_dh;
+    std::cout << "WARNING - OPFLASH SCANNER IS BROKEN" << std::endl;
 
-    art::ServiceHandle<::geo::UBOpReadoutMap> ub_pmt_channel_map;
-    auto const channel_set = ub_pmt_channel_map->GetReadoutChannelSet();
+    /* art::ServiceHandle<::geo::UBOpReadoutMap> ub_pmt_channel_map; */
+    /* auto const channel_set = ub_pmt_channel_map->GetReadoutChannelSet(); */
 
-    art::ServiceHandle<::geo::Geometry> geo; 
+    /* //art::ServiceHandle<::geo::Geometry> geo;  */
 
 
-    for(size_t i=0; i<dh->size(); ++i) {
+    /* for(size_t i=0; i<dh->size(); ++i) { */
 
-      art::Ptr<::recob::OpFlash> flash_ptr(dh,i);
-      std::vector<double> pe_per_opdet;
+    /*   art::Ptr<::recob::OpFlash> flash_ptr(dh,i); */
+    /*   std::vector<double> pe_per_opdet; */
 
-      //pe_per_opdet.reserve(geo->NOpChannels());
-      //for(size_t j=0; j<geo->NOpChannels(); ++j){
-      //  pe_per_opdet.push_back(flash_ptr->PE(j));
-      //}    
+    /*   //pe_per_opdet.reserve(geo->NOpChannels()); */
+    /*   //for(size_t j=0; j<geo->NOpChannels(); ++j){ */
+    /*   //  pe_per_opdet.push_back(flash_ptr->PE(j)); */
+    /*   //}     */
 
-      pe_per_opdet.reserve((*(channel_set.rbegin())));
-      double pe_larsoft = flash_ptr->TotalPE();
-      double pe_larlite = 0.;
-      for(auto const& ch : channel_set) {
-	pe_per_opdet.resize(ch+1);
-	if(pe_larsoft > pe_larlite) {
-	  pe_larlite += flash_ptr->PE(ch);
-	  pe_per_opdet[ch] = flash_ptr->PE(ch);
-	}else
-	  pe_per_opdet[ch] = 0.;
-      }
+    /*   pe_per_opdet.reserve((*(channel_set.rbegin()))); */
+    /*   double pe_larsoft = flash_ptr->TotalPE(); */
+    /*   double pe_larlite = 0.; */
+    /*   for(auto const& ch : channel_set) { */
+    /* 	pe_per_opdet.resize(ch+1); */
+    /* 	if(pe_larsoft > pe_larlite) { */
+    /* 	  pe_larlite += flash_ptr->PE(ch); */
+    /* 	  pe_per_opdet[ch] = flash_ptr->PE(ch); */
+    /* 	}else */
+    /* 	  pe_per_opdet[ch] = 0.; */
+    /*   } */
       
-      ::larlite::opflash lite_flash( flash_ptr->Time(),
-				     flash_ptr->TimeWidth(),
-				     flash_ptr->AbsTime(),
-				     flash_ptr->Frame(),
-				     pe_per_opdet,
-				     flash_ptr->InBeamFrame(),
-				     flash_ptr->OnBeamTime(),
-				     flash_ptr->FastToTotal(),
-				     flash_ptr->YCenter(),
-				     flash_ptr->YWidth(),
-				     flash_ptr->ZCenter(),
-				     flash_ptr->ZWidth(),
-				     flash_ptr->WireCenters(),
-				     flash_ptr->WireWidths());
+    /*   ::larlite::opflash lite_flash( flash_ptr->Time(), */
+    /* 				     flash_ptr->TimeWidth(), */
+    /* 				     flash_ptr->AbsTime(), */
+    /* 				     flash_ptr->Frame(), */
+    /* 				     pe_per_opdet, */
+    /* 				     flash_ptr->InBeamFrame(), */
+    /* 				     flash_ptr->OnBeamTime(), */
+    /* 				     flash_ptr->FastToTotal(), */
+    /* 				     flash_ptr->YCenter(), */
+    /* 				     flash_ptr->YWidth(), */
+    /* 				     flash_ptr->ZCenter(), */
+    /* 				     flash_ptr->ZWidth(), */
+    /* 				     flash_ptr->WireCenters(), */
+    /* 				     flash_ptr->WireWidths()); */
       
-      //fPtrIndex_opflash[flash_ptr] = std::make_pair(lite_data->size(),name_index);
-      lite_data->push_back(lite_flash);
-    }
+    /*   //fPtrIndex_opflash[flash_ptr] = std::make_pair(lite_data->size(),name_index); */
+    /*   lite_data->push_back(lite_flash); */
+    /* } */
+
   }
 
   template <>
@@ -1312,23 +1318,23 @@ namespace larlite {
     }
   }
 
-  template<>
-  void ScannerAlgo::ScanData(art::Handle<std::vector< ::evwgh::MCEventWeight> > const &dh,
-                             ::larlite::event_base* lite_dh)
-  {
+  /* template<> */
+  /* void ScannerAlgo::ScanData(art::Handle<std::vector< ::evwgh::MCEventWeight> > const &dh, */
+  /*                            ::larlite::event_base* lite_dh) */
+  /* { */
 
-    fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;
-    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
-    auto lite_data = (::larlite::event_mceventweight*)lite_dh;
-    for(size_t i=0; i<dh->size(); ++i) {
-      art::Ptr<::evwgh::MCEventWeight> weight_ptr(dh,i);
-      larlite::mceventweight lite_weight(weight_ptr->fWeight);
+  /*   fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true; */
+  /*   //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name()); */
+  /*   auto lite_data = (::larlite::event_mceventweight*)lite_dh; */
+  /*   for(size_t i=0; i<dh->size(); ++i) { */
+  /*     art::Ptr<::evwgh::MCEventWeight> weight_ptr(dh,i); */
+  /*     larlite::mceventweight lite_weight(weight_ptr->fWeight); */
 
-      auto w_map = lite_weight.GetWeights() ;
+  /*     auto w_map = lite_weight.GetWeights() ; */
 
-      lite_data->push_back(lite_weight);
-    }
-  }
+  /*     lite_data->push_back(lite_weight); */
+  /*   } */
+  /* } */
 
   template <>
   void ScannerAlgo::ScanData(art::Handle<std::vector< ::anab::FlashMatch> > const &dh,
@@ -1480,11 +1486,11 @@ namespace larlite {
     return fPtrIndex_trigger[key1][key2]; 
   }
 
-  template <> std::map<art::Ptr< ::raw::ubdaqSoftwareTriggerData>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
-  { if(fPtrIndex_swtrigger.size()<=key1) fPtrIndex_swtrigger.resize(key1+1);
-    if(fPtrIndex_swtrigger[key1].size()<=key2) fPtrIndex_swtrigger[key1].resize(key2+1);
-    return fPtrIndex_swtrigger[key1][key2]; 
-  }
+  /* template <> std::map<art::Ptr< ::raw::ubdaqSoftwareTriggerData>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2) */
+  /* { if(fPtrIndex_swtrigger.size()<=key1) fPtrIndex_swtrigger.resize(key1+1); */
+  /*   if(fPtrIndex_swtrigger[key1].size()<=key2) fPtrIndex_swtrigger[key1].resize(key2+1); */
+  /*   return fPtrIndex_swtrigger[key1][key2];  */
+  /* } */
 
   template <> std::map<art::Ptr< ::recob::Wire>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
   { if(fPtrIndex_wire.size()<=key1) fPtrIndex_wire.resize(key1+1);
@@ -1558,11 +1564,11 @@ namespace larlite {
     return fPtrIndex_pfpart[key1][key2]; 
   }
 
-  template <> std::map<art::Ptr< ::evwgh::MCEventWeight>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
-  { if(fPtrIndex_eventweight.size()<=key1) fPtrIndex_eventweight.resize(key1+1);
-    if(fPtrIndex_eventweight[key1].size()<=key2) fPtrIndex_eventweight[key1].resize(key2+1);
-    return fPtrIndex_eventweight[key1][key2];
-  }
+  /* template <> std::map<art::Ptr< ::evwgh::MCEventWeight>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2) */
+  /* { if(fPtrIndex_eventweight.size()<=key1) fPtrIndex_eventweight.resize(key1+1); */
+  /*   if(fPtrIndex_eventweight[key1].size()<=key2) fPtrIndex_eventweight[key1].resize(key2+1); */
+  /*   return fPtrIndex_eventweight[key1][key2]; */
+  /* } */
  
 
 
@@ -1617,8 +1623,8 @@ namespace larlite {
   { return ::larlite::data::kOpDetWaveform; }
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::raw::Trigger> () const
   { return ::larlite::data::kTrigger; }
-  template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::raw::ubdaqSoftwareTriggerData> () const
-  { return ::larlite::data::kSWTrigger; }
+  /* template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::raw::ubdaqSoftwareTriggerData> () const */
+  /* { return ::larlite::data::kSWTrigger; } */
   // recob
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::recob::Wire> () const
   { return ::larlite::data::kWire; }
@@ -1656,13 +1662,13 @@ namespace larlite {
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::anab::FlashMatch> () const
   { return ::larlite::data::kFlashMatch; }
   // MuCS
-  template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::MuCS::MuCSData> () const
-  { return ::larlite::data::kMuCSData; }
-  template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::MuCS::MuCSRecoData> () const
-  { return ::larlite::data::kMuCSReco; }
+  /* template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::MuCS::MuCSData> () const */
+  /* { return ::larlite::data::kMuCSData; } */
+  /* template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::MuCS::MuCSRecoData> () const */
+  /* { return ::larlite::data::kMuCSReco; } */
   // evwgh
-  template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::evwgh::MCEventWeight> () const
-  { return ::larlite::data::kMCEventWeight; }
+  /* template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::evwgh::MCEventWeight> () const */
+  /* { return ::larlite::data::kMCEventWeight; } */
   //
   // LocateLiteProduct implementation
   //
@@ -1880,10 +1886,10 @@ namespace larlite {
 										  ::larlite::event_ass* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
-  template <> void ScannerAlgo::ScanAssociation <::evwgh::MCEventWeight,::evwgh::MCEventWeight>(art::Event const& e,
-                                           art::Handle<std::vector<::evwgh::MCEventWeight> > &dh,
-                                           ::larlite::event_ass* lite_dh)
-   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
+  /* template <> void ScannerAlgo::ScanAssociation <::evwgh::MCEventWeight,::evwgh::MCEventWeight>(art::Event const& e, */
+  /*                                          art::Handle<std::vector<::evwgh::MCEventWeight> > &dh, */
+  /*                                          ::larlite::event_ass* lite_dh) */
+  /*  { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; } */
 
 
 

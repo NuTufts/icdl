@@ -7,7 +7,9 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 
 #---Module directory
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
+list(APPEND CMAKE_MODULE_PATH "$ENV{IFDHC_LIB}/ifdhc/cmake")
+message( "${CMAKE_MODULE_PATH}" )
 
 ## Dependencies
 
@@ -47,10 +49,31 @@ elseif(USE_PYTHON2)
 else()
   set(LITEMAKER_USE_PYTHON 0)
 endif()
+message( STATUS "Likemaker python version: ${LITEMAKER_PYTHON_VERSION}")
 
 # -- LARLITE --
+set( larlite_DIR $ENV{LARLITE_LIBDIR}/cmake/larlite )
+find_package( larlite REQUIRED )
 
 # -- ART/GALLERY/CANVAS --
+find_package(PkgConfig)
+pkg_check_modules(SQLite3 REQUIRED sqlite3)
+set( SQLite3_LIBRARY $ENV{SQLITE_LIB}/libsqlite3_ups.so )
+find_package( Boost REQUIRED )
+find_package( Range )
+find_package( cetlib REQUIRED QUIET )
+find_package( cetlib_except REQUIRED QUIET )
+find_package( messagefacility REQUIRED QUIET )
+find_package( art REQUIRED QUIET )
+find_package( canvas REQUIRED QUIET )
+find_package( gallery REQUIRED QUIET )
+find_package( icarusalg REQUIRED QUIET )
+find_package( lardataobj REQUIRED QUIET )
+find_package( larcoreobj REQUIRED QUIET )
+find_package( larcorealg REQUIRED QUIET )
+find_package( ifdhc REQUIRED QUIET )
+find_package( nusimdata REQUIRED QUIET )
+#find_package( larsim REQUIRED QUIET )
 
 
 ## Setup
@@ -60,11 +83,6 @@ include(${ROOT_USE_FILE})
 
 #---Define Variables for subdirectory cmakelists
 set(LITEMAKER_BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
-
-## External repos (from submodules)
-include_directories(extern/json)
-add_subdirectory(extern/json)
-set(LITEMAKER_JSON_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/extern/json/single_include)
 
 ## Add Source
 
