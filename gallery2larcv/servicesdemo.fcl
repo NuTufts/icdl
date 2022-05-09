@@ -1,0 +1,3 @@
+#include "services_basic_icarus.fcl"
+
+services: @local::icarus_basic_services
