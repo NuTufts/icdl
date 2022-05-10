@@ -53,7 +53,7 @@ include_directories( ${LARLITE_INCLUDE_DIR} )
 
 message( status "${larlite_INCLUDE_DIRS}" )
 
-set( LINK_LIBS fhiclcpp::fhiclcpp larcorealg::Geometry icarusalg::Geometry larlite_Geometry ${ROOT_LIBRARIES} )
+set( LINK_LIBS fhiclcpp::fhiclcpp larcorealg::Geometry icarusalg::Geometry larlite_LArUtil larlite_Base ${ROOT_LIBRARIES} )
 
 #target_link_libraries(demo ${LINK_LIBS} )
 target_link_libraries(servicesdemo ${LINK_LIBS} )

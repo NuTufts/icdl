@@ -31,7 +31,7 @@
 #include <iterator> // std::back_inserter()
 
 #include "larlite/Base/GeoTypes.h"
-#include "larlite/Geometry/CryoGeo.h"
+#include "larlite/LArUtil/CryoGeo.h"
 
 larlite::geo::View_t convert_view( geo::View_t v)
 {
@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
 
   TFile outfile("icarus_larlite_geodata.root","recreate");
   TTree geodata("geodata","Geometry data for ICARUS detector");
-  std::vector< larlite::geo::CryoGeo > cryo_v;
+  std::vector< larlite::larutil::CryoGeo > cryo_v;
   geodata.Branch( "cryo_v", &cryo_v );
     
   //geometry setup
@@ -114,7 +114,7 @@ int main(int argc, char** argv) {
     std::cout << "\n" << indent;
     cryostat.PrintCryostatInfo(std::cout, indent + "  ", cryostat.MaxVerbosity);
 
-    larlite::geo::CryoGeo llcryo( (int)cryostat.ID().Cryostat );
+    larlite::larutil::CryoGeo llcryo( (int)cryostat.ID().Cryostat );
     auto const& cryocenter = cryostat.GetCenter();
     llcryo.fCenter = TVector3( cryocenter.x(), cryocenter.y(), cryocenter.z() );
     auto const& cryomin = cryostat.BoundingBox().Min();
@@ -129,7 +129,7 @@ int main(int argc, char** argv) {
       std::cout << "\n" << indent << "  ";
       tpc.PrintTPCInfo(std::cout, indent + "    ", tpc.MaxVerbosity);
 
-      larlite::geo::TPCGeo lltpc( t, (int)cryostat.ID().Cryostat );
+      larlite::larutil::TPCGeo lltpc( t, (int)cryostat.ID().Cryostat );
       lltpc.fCenter = tpc.GetCenter();
       lltpc.fHalfLengths(0) = tpc.ActiveHalfWidth();
       lltpc.fHalfLengths(1) = tpc.ActiveHalfHeight();
@@ -152,7 +152,7 @@ int main(int argc, char** argv) {
 		  << "signal type: " << SignalTypeName(sigType)
 		  << " (" << static_cast<int>(sigType) << ")";
 	
-	larlite::geo::PlaneGeo llplane( p, t, (int)cryostat.ID().Cryostat, 
+	larlite::larutil::PlaneGeo llplane( p, t, (int)cryostat.ID().Cryostat, 
 					convert_view(plane.View()), 
 					convert_signal(geom->SignalType(plane.ID())) );
 	llplane.fCenter        = plane.GetCenter();
@@ -175,10 +175,10 @@ int main(int argc, char** argv) {
           std::cout << "\n" << indent << "      " << wireID << " CH=" << ch_id << " ";
           wire.PrintWireInfo(std::cout, indent + "      ", wire.MaxVerbosity);
 
-	  larlite::geo::WireGeo llwire( (int)ch_id, (int)wireID.Wire, p, t, (int)cryostat.ID().Cryostat,
+	  larlite::larutil::WireGeo llwire( (int)ch_id, (int)wireID.Wire, p, t, (int)cryostat.ID().Cryostat,
 					wire.GetStart(), wire.GetEnd() );
 
-	  std::cout << indent << "Making larlite::geo::WireGeo[ " << (int)ch_id << "," 
+	  std::cout << indent << "Making larlite::larutil::WireGeo[ " << (int)ch_id << "," 
 		    <<  (int)wireID.Wire << ","
 		    <<  p << "," <<  t << "," <<  (int)cryostat.ID().Cryostat << "]" 
 		    << std::endl;
@@ -200,7 +200,7 @@ int main(int argc, char** argv) {
       //   opDet.PrintOpDetInfo
       //     (std::forward<Stream>(std::cout), indent + "  ", opDet.MaxVerbosity);
       auto opcenter = opDet.GetCenter();
-      larlite::geo::OpDetGeo llgeo( opDet.ID().OpDet, 
+      larlite::larutil::OpDetGeo llgeo( opDet.ID().OpDet, 
 				    cryostat.ID().Cryostat,
 				    TVector3( opcenter.x(), opcenter.y(), opcenter.z() ) );
 
