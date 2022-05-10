@@ -30,6 +30,9 @@
 // larlite
 #include "larlite/DataFormat/storage_manager.h"
 #include "larlite/DataFormat/mcpart.h"
+#include "larlite/DataFormat/mctruth.h"
+#include "larlite/DataFormat/mcflux.h"
+#include "larlite/DataFormat/gtruth.h"
 
 // litemaker
 #include "litemaker/scanner/ScannerAlgo.h"
@@ -97,6 +100,9 @@ int main(int argc, char** argv) {
 
   art::InputTag const wire_tag("roifinder","PHYSCRATEDATATPCEW","MCstage0");
   art::InputTag const mcparticle_tag("largeant","","G4");
+  art::InputTag const mctruth_tag("generator","","GenBNBbkgr");
+  art::InputTag const mcflux_tag("generator","","GenBNBbkgr");
+  art::InputTag const gtruth_tag("generator","","GenBNBbkgr");
   
   std::cout << "start event loop" << std::endl;
 
@@ -162,8 +168,24 @@ int main(int argc, char** argv) {
       auto pMCParticleVec = event.getValidHandle< std::vector<simb::MCParticle> >(mcparticle_tag);
       larlite::event_mcpart* ev_mcpart = 
 	(larlite::event_mcpart*)llout.get_data( larlite::data::kMCParticle, "largeant" );
-
       scanner.ScanData( *pMCParticleVec, ev_mcpart );
+
+      auto pMCTruthVec = event.getValidHandle< std::vector<simb::MCTruth> >(mctruth_tag);
+      larlite::event_mctruth* ev_mctruth = 
+	(larlite::event_mctruth*)llout.get_data( larlite::data::kMCTruth, "generator" );
+      scanner.ScanData( *pMCTruthVec, ev_mctruth );
+
+      auto pMCFluxVec = event.getValidHandle< std::vector<simb::MCFlux> >(mctruth_tag);
+      larlite::event_mcflux* ev_mcflux = 
+	(larlite::event_mcflux*)llout.get_data( larlite::data::kMCFlux, "generator" );
+      scanner.ScanData( *pMCFluxVec, ev_mcflux );
+
+      auto pGTruthVec = event.getValidHandle< std::vector<simb::GTruth> >(mctruth_tag);
+      larlite::event_gtruth* ev_gtruth = 
+	(larlite::event_gtruth*)llout.get_data( larlite::data::kGTruth, "generator" );
+      scanner.ScanData( *pGTruthVec, ev_gtruth );
+
+
       llout.set_id( 0, 0, ientry );
       llout.next_event();
       // define a meta

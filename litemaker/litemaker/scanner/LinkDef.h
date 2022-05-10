@@ -10,7 +10,7 @@
 #pragma link off all functions;
 
 // namespace
-#pragma link C++ namespace lalite+;
+#pragma link C++ namespace larlite+;
 
 //ADD_NEW_CLASS ... do not change this line
 #endif

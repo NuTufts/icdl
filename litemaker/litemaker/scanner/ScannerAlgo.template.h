@@ -64,15 +64,16 @@ namespace larlite {
   // ScanData specialization
   //
   template <>
-  void ScannerAlgo::ScanData(art::Handle<std::vector< ::simb::MCTruth> > const &dh,
+  void ScannerAlgo::ScanData(std::vector< ::simb::MCTruth> const &dh,
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;
     //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_mctruth*)lite_dh;
-    for(size_t i=0; i<dh->size(); ++i) {
+    for(size_t i=0; i<dh.size(); ++i) {
       
-      const art::Ptr<::simb::MCTruth> mct_ptr(dh,i);
+      //const art::Ptr<::simb::MCTruth> mct_ptr(dh,i);
+      const ::simb::MCTruth* mct_ptr = &dh.at(i);
       
       larlite::mctruth lite_mct;
       
@@ -152,15 +153,16 @@ namespace larlite {
   }
   
   template <>
-  void ScannerAlgo::ScanData(art::Handle<std::vector< ::simb::GTruth> > const &dh,
+  void ScannerAlgo::ScanData(std::vector< ::simb::GTruth> const &dh,
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
     //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_gtruth*)lite_dh;
-    for(size_t i=0; i<dh->size(); ++i) {
+    for(size_t i=0; i<dh.size(); ++i) {
       
-      const art::Ptr<::simb::GTruth> gtruth_ptr(dh,i);
+      //const art::Ptr<::simb::GTruth> gtruth_ptr(dh,i);
+      const ::simb::GTruth* gtruth_ptr = &dh.at(i);
       
       larlite::gtruth lite_gtruth;
       
@@ -261,15 +263,16 @@ namespace larlite {
   }
   
   template <>
-  void ScannerAlgo::ScanData(art::Handle<std::vector< ::simb::MCFlux> > const &dh,
+  void ScannerAlgo::ScanData(std::vector< ::simb::MCFlux> const &dh,
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
     //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_mcflux*)lite_dh;
-    for(size_t i=0; i<dh->size(); ++i) {
+    for(size_t i=0; i<dh.size(); ++i) {
       
-      const art::Ptr<::simb::MCFlux> mcflux_ptr(dh,i);
+      //const art::Ptr<::simb::MCFlux> mcflux_ptr(dh,i);
+      const ::simb::MCFlux* mcflux_ptr = &dh.at(i);
       
       larlite::mcflux lite_mcflux;
 
