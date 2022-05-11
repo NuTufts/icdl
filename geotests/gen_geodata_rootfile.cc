@@ -10,10 +10,18 @@
 // - Geometry
 #include "larcorealg/Geometry/StandaloneGeometrySetup.h"
 #include "larcorealg/Geometry/GeometryCore.h"
+#include "larcorealg/Geometry/StandaloneBasicSetup.h"
+
+#ifdef ICARUS
 #include "icarusalg/Geometry/ICARUSChannelMapAlg.h"
 #include "icarusalg/Geometry/LoadStandardICARUSgeometry.h"
-// - configuration
-#include "larcorealg/Geometry/StandaloneBasicSetup.h"
+#endif
+
+#ifdef SBND
+#include "sbndcode/Geometry/ChannelMapSBNDAlg.h"
+#endif
+
+
 
 // // gallery/canvas
 #include "fhiclcpp/ParameterSet.h"
@@ -87,13 +95,23 @@ int main(int argc, char** argv) {
   // // set up message facility (always picked from "services.message")
   lar::standalone::SetupMessageFacility(config, "servicesdemo");
 
+#ifdef ICARUS
   TFile outfile("icarus_larlite_geodata.root","recreate");
+#endif
+#ifdef SBND
+  TFile outfile("sbnd_larlite_geodata.root","recreate");
+#endif
   TTree geodata("geodata","Geometry data for ICARUS detector");
   std::vector< larlite::larutil::CryoGeo > cryo_v;
   geodata.Branch( "cryo_v", &cryo_v );
     
   //geometry setup
+#ifdef ICARUS
   auto geom = lar::standalone::SetupGeometry<icarus::ICARUSChannelMapAlg>(config.get<fhicl::ParameterSet>("services.Geometry"));
+#endif
+#ifdef SBND
+  auto geom = lar::standalone::SetupGeometry<geo::ChannelMapSBNDAlg>(config.get<fhicl::ParameterSet>("services.Geometry"));
+#endif
   //geom->Print(std::cout);
   
   std::cout << "Detector " << geom->DetectorName() << " has "

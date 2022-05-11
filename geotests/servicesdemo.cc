@@ -31,10 +31,17 @@
 // - Geometry
 #include "larcorealg/Geometry/StandaloneGeometrySetup.h"
 #include "larcorealg/Geometry/GeometryCore.h"
+#include "larcorealg/Geometry/StandaloneBasicSetup.h"
+
+#ifdef ICARUS
 #include "icarusalg/Geometry/ICARUSChannelMapAlg.h"
 #include "icarusalg/Geometry/LoadStandardICARUSgeometry.h"
-// - configuration
-#include "larcorealg/Geometry/StandaloneBasicSetup.h"
+#endif
+
+#ifdef SBND
+#include "sbndcode/Geometry/ChannelMapSBNDAlg.h"
+#endif
+
 
 // // gallery/canvas
 // #include "gallery/Event.h"
@@ -87,7 +94,13 @@ int main(int argc, char** argv) {
   // //
   
   //geometry setup (it's special)
+#ifdef ICARUS
   auto geom = lar::standalone::SetupGeometry<icarus::ICARUSChannelMapAlg>(config.get<fhicl::ParameterSet>("services.Geometry"));
+#endif
+#ifdef SBND
+  auto geom = lar::standalone::SetupGeometry<geo::ChannelMapSBNDAlg>(config.get<fhicl::ParameterSet>("services.Geometry"));
+#endif
+
   geom->Print(std::cout);
   //geom->Info("  ");
 
