@@ -15,12 +15,19 @@ int main( int nargs, char** argv )
   TFile fout("output_icarus_wireoverlap_matrices.root", "RECREATE");
   TTree intersectiondata( "intersectdata", "Wire Intersection Matrices for ICARUS" );
   std::vector< TMatrixD > matrix_v;
+  int cryostat = 0;
+  int tpc = 0;
+  std::vector< std::vector<int> > plane_indices;;
+  int plane2 = 0;
+  intersectiondata.Branch( "cryostat", &cryostat, "cryostat/I");
+  intersectiondata.Branch( "tpc",      &tpc,      "tpc/I");
+  intersectiondata.Branch( "plane_indices",   &plane_indices );
   intersectiondata.Branch( "matrix_v", &matrix_v );
 
   for (int icryo=0; icryo<(int)geom->Ncryostats(); icryo++) {
     for (int itpc=0; itpc<(int)geom->NTPCs(icryo); itpc++) {
 
-      int nplanes = geom->Nplanes(icryo,itpc);
+      int nplanes = geom->Nplanes(itpc,icryo);
 
       // for each tpc, we need to know the intersections between planes
       for (int ip1=0; ip1<nplanes; ip1++) {
@@ -28,6 +35,8 @@ int main( int nargs, char** argv )
 	for (int ip2=ip1+1; ip2<nplanes; ip2++) {
 	  int nwires_p2 = geom->Nwires( ip2, itpc, icryo );
 
+	  std::cout << "Make intersections for cryo=" << icryo << " tpc=" << itpc << " planes (" << ip1 << "," << ip2 << ")" << std::endl;
+	  
 	  std::vector<int> intersect_vec( nwires_p1*nwires_p2 );
 	  TMatrixD intersect_matrix( nwires_p1, nwires_p2 );
 
@@ -44,14 +53,18 @@ int main( int nargs, char** argv )
 	    }
 	  }
 	  matrix_v.emplace_back( std::move(intersect_matrix) );
+	  std::vector<int> pindices = { ip1, ip2 };
+	  plane_indices.push_back( pindices );
 	}
       }
 
+      cryostat = icryo;
+      tpc = itpc;
+      
       intersectiondata.Fill();
       matrix_v.clear();
-      break;
+      plane_indices.clear();
     }
-    break;
   }
 
   fout.Write();
