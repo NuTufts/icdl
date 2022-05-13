@@ -5,6 +5,7 @@ project(spacepointgen CXX)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 
 set( larlite_DIR $ENV{LARLITE_LIBDIR}/cmake/larlite )
+find_package( ROOT REQUIRED )
 find_package( larlite REQUIRED )
 
 #add_executable
@@ -16,7 +17,7 @@ add_executable(gen_wireoverlap_tensors gen_wireoverlap_tensors.cxx)
 set_property(TARGET gen_wireoverlap_tensors PROPERTY CXX_STANDARD 17)
 
 include_directories( ${LARLITE_INCLUDE_DIR} )
-
+include_directories( ${ROOT_INCLUDE_DIRS} )
 
 set( LINK_LIBS larlite_LArUtil larlite_Base ${ROOT_LIBRARIES} )
 
