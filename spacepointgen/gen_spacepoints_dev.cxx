@@ -6,6 +6,8 @@
 #include "TTree.h"
 #include "TMatrixD.h"
 #include "larlite/LArUtil/Geometry.h"
+#include "larlite/DataFormat/storage_manager.h"
+#include "larlite/DataFormat/larflow3dhit.h"
 #include "larcv/core/DataFormat/IOManager.h"
 #include "larcv/core/DataFormat/EventImage2D.h"
 
@@ -38,7 +40,7 @@ int main( int nargs, char** argv )
   int nentries = intersectiondata->GetEntries();
   for (int i=0; i<nentries; i++) {
     intersectiondata->GetEntry(i);
-    std::vector<int> index_v = { cryostat, tpc, p_plane_indices->at(0), p_plane_indices->at(1) };
+    std::vector<int> index_v = { cryostat, tpc, p_plane_indices->at(0), p_plane_indices->at(1), p_plane_indices->at(2) };
     std::cout << "matrix[" << i << "] cryo=" << cryostat << " tpc=" << tpc << " p1=" << index_v[2] << " p2=" << index_v[3] << std::endl;
     TMatrixD mat( dim1, dim2 ); // (nrows, ncols)
     std::cout << "  dim1= " << dim1 << " dim2=" << dim2 << std::endl;
@@ -58,6 +60,10 @@ int main( int nargs, char** argv )
   iolcv.add_in_file( "../out_larcv.root" );
   iolcv.initialize();
 
+  larlite::storage_manager ioll( larlite::storage_manager::kWRITE );
+  ioll.set_out_filename("out_spacepoints.root");
+  ioll.open();
+
   std::vector< std::vector<int> > plane_combos_v;
   plane_combos_v.push_back( std::vector<int>( {0,1,2} ) );
   plane_combos_v.push_back( std::vector<int>( {0,2,1} ) );
@@ -71,6 +77,9 @@ int main( int nargs, char** argv )
       = (larcv::EventImage2D*)iolcv.get_data(larcv::kProductImage2D, "wire");
     auto const& adc_v = ev_adc->as_vector();
 
+    larlite::event_larflow3dhit* ev_hit =
+      (larlite::event_larflow3dhit*)ioll.get_data( larlite::data::kLArFlow3DHit, "spacepoints" );
+
     int start_plane = 6;
     int icryo    = start_plane/12; // 12 images per cryo
     int itpc     = (start_plane-12*icryo)/3; // 3 images per tpc
@@ -82,27 +91,14 @@ int main( int nargs, char** argv )
       int ipl1 = plane_combos_v[ii][0];
       int ipl2 = plane_combos_v[ii][1];
       int ipl3 = plane_combos_v[ii][2];
-      std::vector<int> plane_index1 = { icryo, itpc, ipl1, ipl2 };
+      std::vector<int> plane_index1 = { icryo, itpc, ipl1, ipl2, ipl3 };
       auto it1 = m_planeid_to_tree_entry.find( plane_index1 );
       if ( it1==m_planeid_to_tree_entry.end() )
 	throw std::runtime_error("bad plane index1");      
       const TMatrixD& intersect1 = matrix_list_v.at( it1->second );
 
-      std::vector<int> plane_index2;
-      if ( ipl2<ipl3 )
-	plane_index2 = std::vector<int>({ icryo, itpc, ipl2, ipl3 });
-      else
-	plane_index2 = std::vector<int>({ icryo, itpc, ipl3, ipl2 });
-      
-      auto it2 = m_planeid_to_tree_entry.find( plane_index2 );
-      if ( it2==m_planeid_to_tree_entry.end() )
-	throw std::runtime_error("bad plane index2");      
-      const TMatrixD& intersect2 = matrix_list_v.at( it2->second );
-
       std::vector<const TMatrixD*> intersect_v;
       intersect_v.push_back( &intersect1 );
-      intersect_v.push_back( &intersect2 );
-
       intersect_vv.push_back( intersect_v );
     }
       
@@ -136,63 +132,40 @@ int main( int nargs, char** argv )
       for (int ii=0; ii<(int)plane_combos_v.size(); ii++) {
 	int ipl1 = plane_combos_v[ii][0];
      	int ipl2 = plane_combos_v[ii][1];
+	int ipl3 = plane_combos_v[ii][2];
      	const TMatrixD& intersect = *(intersect_vv[ii][0]);
      	//std::cout << ii << ": " << ipl1 << "," << ipl2 << std::endl;
 	//std::cout << "matrix: " << intersect.GetNrows() << "x" << intersect.GetNcols() << " elemns=" << intersect.GetNoElements() << std::endl;
-	std::vector< std::vector<int> > doublets_v;
  	for (auto idx1 : plane_cols[ipl1] ) {
 	  for (auto idx2: plane_cols[ipl2] ) {
 	    //std::cout << "(" << idx1 << "," << idx2 << ")" << std::endl;
 	    if ( intersect[idx1][idx2]> 0 ) {	    
 	      // register doublet
 	      //std::cout << " register doublet: " << idx1 << "," << idx2 << std::endl;
-	      doublets_v.push_back( std::vector<int>({idx1,idx2}) );
-	    }
-	  }
-	}
-	//std::cout << "combo[" << ii << "] num doublets: " << doublets_v.size() << std::endl;
 
-	int ipl3 = plane_combos_v[ii][2];
-	int trips_registered = 0;
-	const TMatrixD& intersect2 = *(intersect_vv[ii][1]);
-	//std::cout << "matrix2: " << intersect2.GetNrows() << "x" << intersect2.GetNcols() << " elemns=" << intersect2.GetNoElements() << std::endl;	
-	if ( ipl2<ipl3 ) {
-	  // normal ordering
-	  //std::cout << " normal ordering" << std::endl;
-	  for (auto idx3: plane_cols[ipl3]) {
-	    for (auto doub : doublets_v) {
-	      int col2 = doub[1];
-	      if ( intersect2[col2][idx3]>0 ) {
-		// register triplet
+	      // other plane wire
+	      int otherwire = intersect[idx1][idx2]-1;
+	      if ( adc_v[start_plane+ipl3].pixel(irow,otherwire)>0 ) {
 		std::vector<int> triplet(4,0);
-		triplet[ipl1] = doub[0];
-		triplet[ipl2] = doub[1];
-		triplet[ipl3] = idx3;
+		triplet[ipl1] = idx1;
+		triplet[ipl2] = idx2;
+		triplet[ipl3] = otherwire;
 		triplet[3] = irow;
 		triplet_v.push_back( triplet );
-		trips_registered++;
+
+		larlite::larflow3dhit hit;
+		hit.resize(3);
+		TVector3 pos(0,0,0);
+		int ch1 = geom->PlaneWireToChannel( idx1, ipl1, itpc, icryo );
+		int ch2 = geom->PlaneWireToChannel( idx2, ipl2, itpc, icryo );
+		bool crosses = geom->ChannelsIntersect( ch1, ch2, pos );
+		for (int i=0; i<3; i++)
+		  hit[i] = pos[i];
+		hit[0] = irow*0.5*0.150;
+		ev_hit->emplace_back( std::move(hit) );
 	      }
 	    }
 	  }
-	}
-	else {
-	  //std::cout << " inverted ordering" << std::endl;
-	  // invert the ipl2 and ipl3 indices
-	  for (auto idx3: plane_cols[ipl3]) {
-	    for (auto doub : doublets_v) {
-	      int col2 = doub[1];
-	      if ( intersect2[idx3][col2]>0 ) {
-		// register triplet
-		std::vector<int> triplet(4,0);
-		triplet[ipl1] = doub[0];
-		triplet[ipl2] = doub[1];
-		triplet[ipl3] = idx3;
-		triplet[3] = irow;
-		triplet_v.push_back( triplet );
-		trips_registered++;
-	      }
-	    }
-	  }	  
 	}
 	//std::cout << "trips registered this loop: " << trips_registered << std::endl;
 	//std::cout << "tot triplets: " << triplet_v.size() << std::endl;
@@ -204,9 +177,13 @@ int main( int nargs, char** argv )
     std::cout << "TPC tot triplets: " << triplet_v.size() << std::endl;
     std::time_t end = std::clock();
     std::cout << "time elapsed: " << (float)(end-start)/CLOCKS_PER_SEC << std::endl;
+
+    ioll.set_id( 0, 0, ientry );
+    ioll.next_event();
   }//end of entry loop
 
   // GENERATE THE SPACEPOINTS
+  ioll.close();
   
   return 0;
 }

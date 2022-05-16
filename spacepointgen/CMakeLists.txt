@@ -24,7 +24,7 @@ include_directories( ${LARLITE_INCLUDE_DIR} )
 include_directories( ${LARCV_INCLUDE_DIR} )
 include_directories( ${ROOT_INCLUDE_DIRS} )
 
-set( LINK_LIBS larlite_LArUtil larlite_Base LArCVCoreDataFormat LArCVCoreBase ${ROOT_LIBRARIES} )
+set( LINK_LIBS larlite_LArUtil larlite_DataFormat larlite_Base LArCVCoreDataFormat LArCVCoreBase ${ROOT_LIBRARIES} )
 
 target_link_libraries(gen_wireoverlap_tensors ${LINK_LIBS})
 target_link_libraries(gen_spacepoints_dev ${LINK_LIBS})
