@@ -5,11 +5,13 @@ set( LIBNAME litemaker_${MODULE_NAME} )
 # Collect the headers
 set( HEADERS ScannerAlgo.h 
   ScannerAlgo.template.h
+  UtilScannerAlgo.h
 )
 
 # Add sources
 add_library( ${LIBNAME} SHARED
   ScannerAlgo.cxx
+  UtilScannerAlgo.cxx
   )
 
 # create a property to hold our headers
@@ -26,9 +28,13 @@ include_directories( ${art_INCLUDE_DIRS} )
 include_directories( ${canvas_INCLUDE_DIRS} )
 include_directories( ${canvas_root_io_INCLUDE_DIRS} )
 include_directories( ${gallery_INCLUDE_DIRS} )
+include_directories( ${hep_concurrency_INCLUDE_DIRS} )
+include_directories( ${CLHEP_INCLUDE_DIRS} )
 include_directories( ${lardataobj_INCLUDE_DIRS} )
+include_directories( ${lardataalg_INCLUDE_DIRS} )
 include_directories( ${larcoreobj_INCLUDE_DIRS} )
 include_directories( ${larcorealg_INCLUDE_DIRS} )
+include_directories( ${larcore_INCLUDE_DIRS} )
 include_directories( ${nusimdata_INCLUDE_DIRS} )
 include_directories( ${LARLITE_INCLUDE_DIR} )
 
@@ -44,6 +50,7 @@ target_include_directories(${LIBNAME}
   ${canvas_root_io_INCLUDE_DIRS}
   ${gallery_INCLUDE_DIRS}
   ${lardataobj_INCLUDE_DIRS}
+  ${lardata_INCLUDE_DIRS}
   ${larcoreobj_INCLUDE_DIRS}
   ${larcorealg_INCLUDE_DIRS}
   ${nusimdata_INCLUDE_DIRS}
@@ -66,6 +73,10 @@ target_link_libraries(${MODULE_NAME} PUBLIC
   cetlib_except::cetlib_except
   messagefacility::MF_MessageLogger 
   art::Persistency_Common
+  lardataalg::DetectorInfo
+  lardata::DetectorInfoServices_DetectorClocksServiceStandard_service
+  lardata::DetectorInfoServices_DetectorPropertiesServiceStandard_service
+  lardata::DetectorInfoServices_LArPropertiesServiceStandard_service
   canvas::canvas
   ${ROOT_LIBRARIES})
 
