@@ -18,7 +18,9 @@ namespace scanner {
     void SaveDetectorProperties(const fhicl::ParameterSet& config,
 				const ::geo::GeometryCore& geom );
     
-
+    void SaveLArProperties(const fhicl::ParameterSet& config,
+			   const ::geo::GeometryCore& geom );
+    
     
   };
   

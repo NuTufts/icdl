@@ -79,13 +79,7 @@ int main(int argc, char** argv) {
   
     std::cout << "RUN SCANNER" << std::endl;
   scanner.SaveDetectorProperties( config, *geom );
-
-    //LArProperties setup
-  //auto larp = testing::setupProvider<detinfo::LArPropertiesStandard>(config.get<fhicl::ParameterSet>("services.LArPropertiesService"));
-  
-  // DetectorClocks setup
-  //auto detclk = testing::setupProvider<detinfo::DetectorClocksStandard>(config.get<fhicl::ParameterSet>("services.DetectorClocksService"));
-  
+  scanner.SaveLArProperties( config, *geom );  
 
   std::cout << '\n';
   outfile.Write();
