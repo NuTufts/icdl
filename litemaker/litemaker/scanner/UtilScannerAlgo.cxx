@@ -229,7 +229,7 @@ namespace scanner {
 
     //--- Set TTree Branches ---//
     _larp_tree->Branch("fEfield_cryoid", "std::vector<Int_t>",  &fEfield_cryoid);
-    _larp_tree->Branch("fEfield_planeid","std::vector<Int_t>",  &fEfield_tpcid);
+    _larp_tree->Branch("fEfield_tpcid",  "std::vector<Int_t>",  &fEfield_tpcid);
     _larp_tree->Branch("fEfield_planeid","std::vector<Int_t>",  &fEfield_planeid);
     _larp_tree->Branch("fEfield_field","std::vector<Double_t>", &fEfield_field);
     _larp_tree->Branch("fTemperature",&fTemperature,"fTemperature/D");
