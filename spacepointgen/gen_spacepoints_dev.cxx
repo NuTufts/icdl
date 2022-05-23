@@ -6,6 +6,7 @@
 #include "TTree.h"
 #include "TMatrixD.h"
 #include "larlite/LArUtil/Geometry.h"
+#include "larlite/LArUtil/DetectorProperties.h"
 #include "larlite/DataFormat/storage_manager.h"
 #include "larlite/DataFormat/larflow3dhit.h"
 #include "larcv/core/DataFormat/IOManager.h"
@@ -17,6 +18,7 @@ int main( int nargs, char** argv )
   std::cout << "Generate Wire-Overlap Tensors" << std::endl;
 
   auto geom = larlite::larutil::Geometry::GetME( larlite::geo::kICARUS );
+  auto detprop = larutil::DetectorProperties::GetME();
 
   // LOAD THE INTERSECTION DATA
   TFile fmatrices("output_icarus_wireoverlap_matrices.root");
@@ -115,6 +117,7 @@ int main( int nargs, char** argv )
     std::time_t start = std::clock();
     
     for (int irow=0; irow<nrows; irow++) {
+      float tick = meta.pos_y(irow);      
       // loop through the plane colums and get columns above thresh
       //std::cout << "irow[" << irow << "] -----------------------" << std::endl;
       std::vector< std::vector<int> > plane_cols(3);
@@ -128,7 +131,7 @@ int main( int nargs, char** argv )
      	}
 	//std::cout << "  above thresh pixels: " << plane_cols[iplane].size() << std::endl;
       }
-
+      
       for (int ii=0; ii<(int)plane_combos_v.size(); ii++) {
 	int ipl1 = plane_combos_v[ii][0];
      	int ipl2 = plane_combos_v[ii][1];
@@ -161,7 +164,7 @@ int main( int nargs, char** argv )
 		bool crosses = geom->ChannelsIntersect( ch1, ch2, pos );
 		for (int i=0; i<3; i++)
 		  hit[i] = pos[i];
-		hit[0] = irow*0.5*0.150;
+		hit[0] = detprop->ConvertTicksToX(tick,0,itpc,icryo);
 		ev_hit->emplace_back( std::move(hit) );
 	      }
 	    }
