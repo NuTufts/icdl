@@ -21,6 +21,8 @@
 
 #ifdef SBND
 #include "sbndcode/Geometry/ChannelMapSBNDAlg.h"
+#include "larcorealg/Geometry/StandaloneGeometrySetup.h"
+#include "larcorealg/Geometry/GeometryCore.h"
 #endif
 
 
@@ -63,6 +65,9 @@ int main(int argc, char** argv) {
 
 #ifdef ICARUS
   auto geom = icarus::geo::LoadStandardICARUSgeometry( configFile );
+#endif
+#ifdef SBND
+  auto geom = lar::standalone::SetupGeometry<geo::ChannelMapSBNDAlg>(config.get<fhicl::ParameterSet>("services.Geometry"));
 #endif
 
 #ifdef ICARUS
