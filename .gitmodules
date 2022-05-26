@@ -16,3 +16,6 @@
 [submodule "laropencv"]
 	path = laropencv
 	url = https://github.com/nevisub/laropencv
+[submodule "cilantro"]
+	path = cilantro
+	url = https://github.com/NuTufts/cilantro.git

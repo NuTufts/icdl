@@ -1,1 +1,4 @@
 *~
+*.root
+*/.ipynb_checkpoints/*
+*.ipynb

@@ -31,9 +31,9 @@ source configure.sh
 cd $ICDL_BASEDIR
 
 # # Cilantro (3rd party)
-# cd cilantro
-# source dllee_setup.sh
-# cd $ICDL_BASEDIR
+cd cilantro
+source dllee_setup.sh
+cd $ICDL_BASEDIR
 
 # # UB LArCV app
 cd ublarcvapp
