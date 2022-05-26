@@ -21,9 +21,9 @@ cd $ICDL_BASEDIR
 #cd $ICDL_BASEDIR
 
 # LArOpenCV
-#cd LArOpenCV
-#source setup_laropencv.sh
-#cd $ICDL_BASEDIR
+cd laropencv
+source setup_laropencv.sh
+cd $ICDL_BASEDIR
 
 # # LArCV
 cd larcv
@@ -36,18 +36,18 @@ cd $ICDL_BASEDIR
 # cd $ICDL_BASEDIR
 
 # # UB LArCV app
-# cd ublarcvapp
-# source configure.sh
-# cd $ICDL_BASEDIR
+cd ublarcvapp
+source configure.sh
+cd $ICDL_BASEDIR
 
 # # LArFlow
-# cd larflow
-# source configure.sh
-# cd $ICDL_BASEDIR
+cd larflow
+source configure.sh
+cd $ICDL_BASEDIR
 
 # # LArdly viewing tools
-# cd lardly
-# source setenv.sh
-# cd $ICDL_BASEDIR
+cd lardly
+source setenv.sh
+cd $ICDL_BASEDIR
 
 cd ${__icdl_configure_workdir__}

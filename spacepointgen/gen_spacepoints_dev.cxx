@@ -29,12 +29,14 @@ int main( int nargs, char** argv )
   int dim1 = 0;
   int dim2 = 0;
   std::vector< int >* p_data = 0;
+  std::vector< TMatrixD >* p_matrix_v = 0;
   intersectiondata->SetBranchAddress( "cryostat", &cryostat );
   intersectiondata->SetBranchAddress( "tpc",      &tpc );
   intersectiondata->SetBranchAddress( "dim1",     &dim1 );
   intersectiondata->SetBranchAddress( "dim2",     &dim2 );  
   intersectiondata->SetBranchAddress( "plane_indices",  &p_plane_indices );
-  intersectiondata->SetBranchAddress( "data", &p_data );
+  //intersectiondata->SetBranchAddress( "data", &p_data );
+  intersectiondata->SetBranchAddress( "matrix_v", &p_matrix_v );
 
   std::vector< TMatrixD > matrix_list_v;
   std::map< std::vector<int>, int > m_planeid_to_tree_entry;
@@ -44,18 +46,19 @@ int main( int nargs, char** argv )
     intersectiondata->GetEntry(i);
     std::vector<int> index_v = { cryostat, tpc, p_plane_indices->at(0), p_plane_indices->at(1), p_plane_indices->at(2) };
     std::cout << "matrix[" << i << "] cryo=" << cryostat << " tpc=" << tpc << " p1=" << index_v[2] << " p2=" << index_v[3] << std::endl;
-    TMatrixD mat( dim1, dim2 ); // (nrows, ncols)
-    std::cout << "  dim1= " << dim1 << " dim2=" << dim2 << std::endl;
-    for (int i=0; i<dim1; i++) {
-      for (int j=0; j<dim2; j++) {
-	mat[i][j] = (*p_data)[ i*dim2 + j ];
-      }
-    }
-    matrix_list_v.push_back( mat );
+    // TMatrixD mat( dim1, dim2 ); // (nrows, ncols)
+    // std::cout << "  dim1= " << dim1 << " dim2=" << dim2 << std::endl;
+    // for (int i=0; i<dim1; i++) {
+    //   for (int j=0; j<dim2; j++) {
+    // 	mat[i][j] = (*p_data)[ i*dim2 + j ];
+    //   }
+    // }
+    TMatrixD mat(p_matrix_v->at(0));    
+    matrix_list_v.emplace_back( std::move(mat) );
     m_planeid_to_tree_entry[ index_v ] = (int)matrix_list_v.size()-1;
   }
 
-  std::cout << "LOAD MATRICES" << std::endl;
+  std::cout << "LOADED MATRICES" << std::endl;
 
   // LOAD THE IMAGE DATA
   larcv::IOManager iolcv( larcv::IOManager::kREAD );

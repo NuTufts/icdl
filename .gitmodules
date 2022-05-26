@@ -7,3 +7,12 @@
 [submodule "lardly"]
 	path = lardly
 	url = https://github.com/larbys/lardly
+[submodule "larflow"]
+	path = larflow
+	url = https://github.com/nutufts/larflow
+[submodule "ublarcvapp"]
+	path = ublarcvapp
+	url = https://github.com/larbys/ublarcvapp
+[submodule "laropencv"]
+	path = laropencv
+	url = https://github.com/nevisub/laropencv
