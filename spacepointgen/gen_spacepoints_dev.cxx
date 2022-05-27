@@ -6,6 +6,7 @@
 #include "TTree.h"
 #include "TMatrixD.h"
 #include "larlite/LArUtil/Geometry.h"
+#include "larlite/LArUtil/DetectorProperties.h"
 #include "larlite/DataFormat/storage_manager.h"
 #include "larlite/DataFormat/larflow3dhit.h"
 #include "larcv/core/DataFormat/IOManager.h"
@@ -17,6 +18,7 @@ int main( int nargs, char** argv )
   std::cout << "Generate Wire-Overlap Tensors" << std::endl;
 
   auto geom = larlite::larutil::Geometry::GetME( larlite::geo::kICARUS );
+  auto detprop = larutil::DetectorProperties::GetME();
 
   // LOAD THE INTERSECTION DATA
   TFile fmatrices("output_icarus_wireoverlap_matrices.root");
@@ -27,12 +29,14 @@ int main( int nargs, char** argv )
   int dim1 = 0;
   int dim2 = 0;
   std::vector< int >* p_data = 0;
+  std::vector< TMatrixD >* p_matrix_v = 0;
   intersectiondata->SetBranchAddress( "cryostat", &cryostat );
   intersectiondata->SetBranchAddress( "tpc",      &tpc );
   intersectiondata->SetBranchAddress( "dim1",     &dim1 );
   intersectiondata->SetBranchAddress( "dim2",     &dim2 );  
   intersectiondata->SetBranchAddress( "plane_indices",  &p_plane_indices );
-  intersectiondata->SetBranchAddress( "data", &p_data );
+  //intersectiondata->SetBranchAddress( "data", &p_data );
+  intersectiondata->SetBranchAddress( "matrix_v", &p_matrix_v );
 
   std::vector< TMatrixD > matrix_list_v;
   std::map< std::vector<int>, int > m_planeid_to_tree_entry;
@@ -42,18 +46,19 @@ int main( int nargs, char** argv )
     intersectiondata->GetEntry(i);
     std::vector<int> index_v = { cryostat, tpc, p_plane_indices->at(0), p_plane_indices->at(1), p_plane_indices->at(2) };
     std::cout << "matrix[" << i << "] cryo=" << cryostat << " tpc=" << tpc << " p1=" << index_v[2] << " p2=" << index_v[3] << std::endl;
-    TMatrixD mat( dim1, dim2 ); // (nrows, ncols)
-    std::cout << "  dim1= " << dim1 << " dim2=" << dim2 << std::endl;
-    for (int i=0; i<dim1; i++) {
-      for (int j=0; j<dim2; j++) {
-	mat[i][j] = (*p_data)[ i*dim2 + j ];
-      }
-    }
-    matrix_list_v.push_back( mat );
+    // TMatrixD mat( dim1, dim2 ); // (nrows, ncols)
+    // std::cout << "  dim1= " << dim1 << " dim2=" << dim2 << std::endl;
+    // for (int i=0; i<dim1; i++) {
+    //   for (int j=0; j<dim2; j++) {
+    // 	mat[i][j] = (*p_data)[ i*dim2 + j ];
+    //   }
+    // }
+    TMatrixD mat(p_matrix_v->at(0));    
+    matrix_list_v.emplace_back( std::move(mat) );
     m_planeid_to_tree_entry[ index_v ] = (int)matrix_list_v.size()-1;
   }
 
-  std::cout << "LOAD MATRICES" << std::endl;
+  std::cout << "LOADED MATRICES" << std::endl;
 
   // LOAD THE IMAGE DATA
   larcv::IOManager iolcv( larcv::IOManager::kREAD );
@@ -115,6 +120,7 @@ int main( int nargs, char** argv )
     std::time_t start = std::clock();
     
     for (int irow=0; irow<nrows; irow++) {
+      float tick = meta.pos_y(irow);      
       // loop through the plane colums and get columns above thresh
       //std::cout << "irow[" << irow << "] -----------------------" << std::endl;
       std::vector< std::vector<int> > plane_cols(3);
@@ -128,7 +134,7 @@ int main( int nargs, char** argv )
      	}
 	//std::cout << "  above thresh pixels: " << plane_cols[iplane].size() << std::endl;
       }
-
+      
       for (int ii=0; ii<(int)plane_combos_v.size(); ii++) {
 	int ipl1 = plane_combos_v[ii][0];
      	int ipl2 = plane_combos_v[ii][1];
@@ -161,7 +167,7 @@ int main( int nargs, char** argv )
 		bool crosses = geom->ChannelsIntersect( ch1, ch2, pos );
 		for (int i=0; i<3; i++)
 		  hit[i] = pos[i];
-		hit[0] = irow*0.5*0.150;
+		hit[0] = detprop->ConvertTicksToX(tick,0,itpc,icryo);
 		ev_hit->emplace_back( std::move(hit) );
 	      }
 	    }

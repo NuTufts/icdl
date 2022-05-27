@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.6)
 
 project(gallerydemo CXX)
 
-set( DETECTOR "ICARUS" )
+set( DETECTOR "SBND" )
 message("GEO/SERVICES tests")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 
@@ -81,13 +81,12 @@ set( SERVICES_ART_LIBS
      #lardata::DetectorInfoServices_DetectorClocksServiceStandard_service
      #lardata::DetectorInfoServices_DetectorPropertiesServiceStandard_service
      #lardata::DetectorInfoServices_LArPropertiesServiceStandard_service
-     icarusalg::Geometry
      canvas::canvas
      art::Utilities
      art::Framework_Principal
      art::Persistency_Provenance
      art::Persistency_Common )
-     
+
 
 if (DETECTOR STREQUAL "SBND")
 set( LINK_LIBS fhiclcpp::fhiclcpp larcorealg::Geometry sbndcode::Geometry larlite_LArUtil larlite_Base ${ROOT_LIBRARIES} )
@@ -100,5 +99,5 @@ endif()
 #target_link_libraries(demo ${LINK_LIBS} )
 target_link_libraries(servicesdemo ${SERVICES_ART_LIBS} ${LINK_LIBS} )
 target_link_libraries(gen_geodata_rootfile ${LINK_LIBS})
-target_link_libraries(gen_services_rootfile ${LARLITE_LIBS} ${SERVICES_ART_LIBS} ${ROOT_LIBRARIES})
+target_link_libraries(gen_services_rootfile ${LARLITE_LIBS} ${SERVICES_ART_LIBS} ${LINK_LIBS})
 
