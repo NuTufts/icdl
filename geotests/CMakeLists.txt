@@ -55,7 +55,9 @@ set_property(TARGET gen_services_rootfile PROPERTY CXX_STANDARD 17)
 
 include_directories( ${fhiclcpp_INCLUDE_DIRS} )
 include_directories( ${messagefacility_INCLUDE_DIRS} )
+include_directories( ${canvas_INCLUDE_DIRS} )
 include_directories( ${lardataobj_INCLUDE_DIRS} )
+include_directories( ${lardataalg_INCLUDE_DIRS} )
 include_directories( ${larcorealg_INCLUDE_DIRS} )
 include_directories( ${larcore_INCLUDE_DIRS} )
 include_directories( ${icarusalg_INCLUDE_DIRS} )
@@ -96,7 +98,7 @@ set( LINK_LIBS fhiclcpp::fhiclcpp larcorealg::Geometry icarusalg::Geometry larli
 endif()
 
 #target_link_libraries(demo ${LINK_LIBS} )
-target_link_libraries(servicesdemo ${LINK_LIBS} )
+target_link_libraries(servicesdemo ${SERVICES_ART_LIBS} ${LINK_LIBS} )
 target_link_libraries(gen_geodata_rootfile ${LINK_LIBS})
 target_link_libraries(gen_services_rootfile ${LARLITE_LIBS} ${SERVICES_ART_LIBS} ${ROOT_LIBRARIES})
 
