@@ -8,15 +8,14 @@ set( HEADERS ScannerAlgo.h
   UtilScannerAlgo.h
 )
 
-# Add sources
-add_library( ${LIBNAME} SHARED
+set( DICT_HEADERS ScannerAlgo.h 
+  UtilScannerAlgo.h
+)
+
+add_library(${LIBNAME} SHARED
   ScannerAlgo.cxx
   UtilScannerAlgo.cxx
-  )
-
-# create a property to hold our headers
-set_target_properties(${LIBNAME} PROPERTIES PUBLIC_HEADER "${HEADERS}")
-get_target_property(ALL_HEADERS ${LIBNAME} PUBLIC_HEADER)
+)
 
 # includes
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_SOURCE_DIR} )
@@ -36,6 +35,7 @@ include_directories( ${larcoreobj_INCLUDE_DIRS} )
 include_directories( ${larcorealg_INCLUDE_DIRS} )
 include_directories( ${larcore_INCLUDE_DIRS} )
 include_directories( ${nusimdata_INCLUDE_DIRS} )
+include_directories( ${sbnobj_INCLUDE_DIRS} )
 include_directories( ${LARLITE_INCLUDE_DIR} )
 
 target_include_directories(${LIBNAME}
@@ -49,11 +49,13 @@ target_include_directories(${LIBNAME}
   ${canvas_INCLUDE_DIRS}
   ${canvas_root_io_INCLUDE_DIRS}
   ${gallery_INCLUDE_DIRS}
-  ${lardataobj_INCLUDE_DIRS}
   ${lardata_INCLUDE_DIRS}
+  ${lardataobj_INCLUDE_DIRS}
+  ${lardataalg_INCLUDE_DIRS}
   ${larcoreobj_INCLUDE_DIRS}
   ${larcorealg_INCLUDE_DIRS}
   ${nusimdata_INCLUDE_DIRS}
+  ${sbnobj_INCLUDE_DIRS}
   ${LARLITE_INCLUDE_DIR}
   PRIVATE
   ${PROJECT_SOURCE_DIR}
@@ -61,22 +63,27 @@ target_include_directories(${LIBNAME}
 
 
 # Generate the dictionary
-ROOT_GENERATE_DICTIONARY(G__${MODULE_NAME} ${HEADERS} LINKDEF LinkDef.h)
+ROOT_GENERATE_DICTIONARY(G__${LIBNAME} ${DICT_HEADERS} LINKDEF LinkDef.h)
+target_sources( ${LIBNAME} PRIVATE G__${LIBNAME}.cxx )
  
-# Generate the shared library from the sources
-add_library(${MODULE_NAME} SHARED ${SOURCES} G__${MODULE_NAME}.cxx)
-target_link_libraries(${MODULE_NAME} PUBLIC 
+# create a property to hold our headers
+set_target_properties(${LIBNAME} PROPERTIES PUBLIC_HEADER "${HEADERS}")
+get_target_property(ALL_HEADERS ${LIBNAME} PUBLIC_HEADER)
+
+target_link_libraries(${LIBNAME} PUBLIC 
   larlite_DataFormat 
+  larlite_LArUtil
   larlite_Base 
   fhiclcpp::fhiclcpp
   cetlib::cetlib
   cetlib_except::cetlib_except
   messagefacility::MF_MessageLogger 
   art::Persistency_Common
-  lardataalg::DetectorInfo
   lardata::DetectorInfoServices_DetectorClocksServiceStandard_service
   lardata::DetectorInfoServices_DetectorPropertiesServiceStandard_service
   lardata::DetectorInfoServices_LArPropertiesServiceStandard_service
+  lardataalg::DetectorInfo
+  sbnobj::Common_CRT  
   canvas::canvas
   ${ROOT_LIBRARIES})
 
@@ -88,6 +95,6 @@ install(TARGETS ${LIBNAME}
 
 # install files needed for dictionary use in CINT/CLING/PYTHON
 install( FILES
-  ${CMAKE_CURRENT_BINARY_DIR}/lib${MODULE_NAME}_rdict.pcm
-  ${CMAKE_CURRENT_BINARY_DIR}/lib${MODULE_NAME}.rootmap
+  ${CMAKE_CURRENT_BINARY_DIR}/lib${LIBNAME}_rdict.pcm
+  ${CMAKE_CURRENT_BINARY_DIR}/lib${LIBNAME}.rootmap
   DESTINATION lib  )

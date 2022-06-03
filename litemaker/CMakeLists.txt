@@ -71,11 +71,13 @@ find_package( gallery REQUIRED QUIET )
 #find_package( icarusalg REQUIRED QUIET )
 find_package( lardataobj REQUIRED QUIET )
 find_package( lardata REQUIRED QUIET )
+find_package( lardataalg REQUIRED QUIET )
 find_package( larcoreobj REQUIRED QUIET )
 find_package( larcorealg REQUIRED QUIET )
 find_package( larcore REQUIRED QUIET )
 find_package( ifdhc REQUIRED QUIET )
 find_package( nusimdata REQUIRED QUIET )
+find_package( sbnobj REQUIRED QUIET )
 #find_package( larsim REQUIRED QUIET )
 
 

@@ -2,6 +2,10 @@
 #define SCANNERALGO_CXX
 #include "ScannerAlgo.h"
 
+#ifndef __CINT__
+#include "ScannerAlgo.template.h"
+#endif
+
 namespace larlite {
 
   size_t ScannerAlgo::NameIndex(::larlite::data::DataType_t const data_type,

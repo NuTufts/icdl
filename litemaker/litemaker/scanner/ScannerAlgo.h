@@ -47,10 +47,12 @@
 #include "nusimdata/SimulationBase/GTruth.h"
 #include "nusimdata/SimulationBase/MCTruth.h"
 #include "nusimdata/SimulationBase/MCParticle.h"
-#include "lardataobj/OpticalDetectorData/FIFOChannel.h"
-#include "lardataobj/OpticalDetectorData/OpticalTypes.h"
+//#include "lardataobj/OpticalDetectorData/FIFOChannel.h"
+//#include "lardataobj/OpticalDetectorData/OpticalTypes.h"
 #include "lardataobj/MCBase/MCShower.h"
 #include "lardataobj/MCBase/MCTrack.h"
+#include "sbnobj/Common/CRT/CRTTrack.hh"
+#include "sbnobj/Common/CRT/CRTHit.hh"
 /* #include "lardata/DetectorInfoServices/LArPropertiesService.h" */
 /* #include "lardata/Utilities/GeometryUtilities.h" */
 /* #include "lardata/DetectorInfoServices/DetectorPropertiesService.h" */
@@ -216,11 +218,11 @@ namespace larlite {
     std::vector< std::vector< std::map< art::Ptr<::recob::PFParticle>, std::pair<size_t,size_t> > > > fPtrIndex_pfpart;
     std::vector< std::vector< std::map< art::Ptr<::recob::PCAxis>,     std::pair<size_t,size_t> > > > fPtrIndex_pcaxis;
     std::vector< std::vector< std::map< art::Ptr<::anab::FlashMatch>,  std::pair<size_t,size_t> > > > fPtrIndex_fmatch;
+    std::vector< std::vector< std::map< art::Ptr<::sbn::crt::CRTHit>,       std::pair<size_t,size_t> > > > fPtrIndex_crthit;
+    std::vector< std::vector< std::map< art::Ptr<::sbn::crt::CRTTrack>,     std::pair<size_t,size_t> > > > fPtrIndex_crttrack;
     //std::vector< std::vector< std::map< art::Ptr<::evwgh::MCEventWeight>, std::pair<size_t,size_t> > > > fPtrIndex_eventweight;
 
   };
 }
-
-#include "ScannerAlgo.template.h"
 
 #endif

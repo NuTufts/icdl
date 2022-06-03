@@ -19,6 +19,9 @@ find_package( gallery REQUIRED QUIET )
 find_package( art REQUIRED QUIET )
 find_package( cetlib REQUIRED QUIET )
 find_package( cetlib_except REQUIRED QUIET )
+find_package( lardataalg REQUIRED QUIET )
+find_package( lardata REQUIRED QUIET )
+find_package( sbnobj REQUIRED QUIET )
 set( larlite_DIR $ENV{LARLITE_LIBDIR}/cmake/larlite )
 find_package( larlite REQUIRED )
 set( larcv_DIR $ENV{LARCV_LIBDIR}/cmake/larcv )
@@ -68,10 +71,10 @@ set( ART_LIBS
   lardataobj::AnalysisBase
   lardataobj::OpticalDetectorData
   lardataobj::MCBase
+  lardataalg::DetectorInfo
 )
 set( LARLITE_LIBS
      larlite_LArUtil
-     larlite_Geometry
      larlite_Base
      larlite_DataFormat
      litemaker_scanner )

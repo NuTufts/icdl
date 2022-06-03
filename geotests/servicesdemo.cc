@@ -17,17 +17,17 @@
  */
 
 // LArSoft
-// // - data products
-// #include "lardataobj/RecoBase/Track.h"
-// // - DetectorProperties
-// #include "lardataalg/DetectorInfo/DetectorPropertiesStandardTestHelpers.h"
-// #include "lardataalg/DetectorInfo/DetectorPropertiesStandard.h"
-// // - DetectorClocks
-// #include "lardataalg/DetectorInfo/DetectorClocksStandardTestHelpers.h"
-// #include "lardataalg/DetectorInfo/DetectorClocksStandard.h"
-// // - LArProperties
-// #include "lardataalg/DetectorInfo/LArPropertiesStandardTestHelpers.h"
-// #include "lardataalg/DetectorInfo/LArPropertiesStandard.h"
+// - data products
+#include "lardataobj/RecoBase/Track.h"
+// - DetectorProperties
+#include "lardataalg/DetectorInfo/DetectorPropertiesStandardTestHelpers.h"
+#include "lardataalg/DetectorInfo/DetectorPropertiesStandard.h"
+// - DetectorClocks
+#include "lardataalg/DetectorInfo/DetectorClocksStandardTestHelpers.h"
+#include "lardataalg/DetectorInfo/DetectorClocksStandard.h"
+// - LArProperties
+#include "lardataalg/DetectorInfo/LArPropertiesStandardTestHelpers.h"
+#include "lardataalg/DetectorInfo/LArPropertiesStandard.h"
 // - Geometry
 #include "larcorealg/Geometry/StandaloneGeometrySetup.h"
 #include "larcorealg/Geometry/GeometryCore.h"
@@ -108,21 +108,22 @@ int main(int argc, char** argv) {
   //geom->Print(std::cout);
   
   // LArProperties setup
-  //auto larp = testing::setupProvider<detinfo::LArPropertiesStandard>(config.get<fhicl::ParameterSet>("services.LArPropertiesService"));
+  auto larp = testing::setupProvider<detinfo::LArPropertiesStandard>(config.get<fhicl::ParameterSet>("services.LArPropertiesService"));
   
   // DetectorClocks setup
-  //auto detclk = testing::setupProvider<detinfo::DetectorClocksStandard>(config.get<fhicl::ParameterSet>("services.DetectorClocksService"));
+  auto detclk = testing::setupProvider<detinfo::DetectorClocksStandard>(config.get<fhicl::ParameterSet>("services.DetectorClocksService"));
   
   // DetectorProperties setup
-  // auto detp = testing::setupProvider<detinfo::DetectorPropertiesStandard>(config.get<fhicl::ParameterSet>("services.DetectorPropertiesService"),
-  // 									  detinfo::DetectorPropertiesStandard::providers_type{geom.get(),
-  // 									    static_cast<detinfo::LArProperties const*>(larp.get()),
-  // 									    // TODO type cast is required until issue #18001 is solved
-  // 									    static_cast<detinfo::DetectorClocks const*>(detclk.get())});
+  auto detp = testing::setupProvider<detinfo::DetectorPropertiesStandard>(config.get<fhicl::ParameterSet>("services.DetectorPropertiesService"),
+  									  detinfo::DetectorPropertiesStandard::providers_type{geom.get(),
+									      static_cast<detinfo::LArProperties const*>(larp.get()),
+									      // TODO type cast is required until issue #18001 is solved
+									      static_cast<detinfo::DetectorClocks const*>(detclk.get())});
   
   // ***************************************************************************
   // ***  SERVICE PROVIDER SETUP END    ****************************************
   // ***************************************************************************
+  
   
   
   return 0;

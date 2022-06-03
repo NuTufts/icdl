@@ -11,6 +11,7 @@
 
 // namespace
 #pragma link C++ namespace larlite+;
+#pragma link C++ namespace larlite::ScannerAlgo+;
 
 //ADD_NEW_CLASS ... do not change this line
 #endif
