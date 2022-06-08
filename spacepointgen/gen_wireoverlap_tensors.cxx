@@ -10,10 +10,15 @@ int main( int nargs, char** argv )
 
   std::cout << "Generate Wire-Overlap Tensors" << std::endl;
 
-  auto geom = larlite::larutil::Geometry::GetME( larlite::geo::kICARUS );
+  //auto geom = larlite::larutil::Geometry::GetME( larlite::geo::kICARUS );
+  //TFile fout("output_icarus_wireoverlap_matrices.root", "RECREATE");  
+  //TTree intersectiondata( "intersectdata", "Wire Intersection Matrices for ICARUS" );
 
-  TFile fout("output_icarus_wireoverlap_matrices.root", "RECREATE");
-  TTree intersectiondata( "intersectdata", "Wire Intersection Matrices for ICARUS" );
+  auto geom = larlite::larutil::Geometry::GetME( larlite::geo::kMicroBooNE );
+  TFile fout("output_microboone_wireoverlap_matrices.root", "RECREATE");  
+  TTree intersectiondata( "intersectdata", "Wire Intersection Matrices for MicroBooNE" );
+  
+  
   std::vector< TMatrixD > matrix_v;
   int cryostat = 0;
   int tpc = 0;
