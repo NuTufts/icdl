@@ -24,6 +24,8 @@ Machine learning algorithms are also in use by this library. These include the f
 
 ## Building
 
+Go to the [Wiki](https://github.com/NuTufts/icdl/wiki) to find info on building and other tutorials.
+
 ### On Tufts Machines
 
 ### On the Tufts Cluster
