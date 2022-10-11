@@ -7,13 +7,15 @@ MACHINE=`uname --nodename`
 if [ $MACHINE == "trex" ]
 then
     echo "SETUP TREX"
-    source /usr/local/root/6.16.00_py3/bin/thisroot.sh
+    source /usr/local/root/6.16.00_py3_gcc8/bin/thisroot.sh
 
     export CUDA_HOME=/usr/local/cuda-10.0
     [[ ":$LD_LIBRARY_PATH:" != *":${CUDA_HOME}/lib64:"* ]] && export LD_LIBRARY_PATH="${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}"
 
     export OPENCV_INCDIR=/usr/local/opencv/opencv-3.4.6/include
     export OPENCV_LIBDIR=/usr/local/opencv/opencv-3.4.6/lib
+    export CC=gcc-8
+    export CXX=g++-8
 
 elif [ $MACHINE == "meitner" ]
 then
