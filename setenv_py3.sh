@@ -7,7 +7,7 @@ MACHINE=`uname --nodename`
 if [ $MACHINE == "trex" ]
 then
     echo "SETUP TREX"
-    source /usr/local/root/6.16.00_py3_gcc8/bin/thisroot.sh
+    source /usr/local/root/6.24.04_py3_gcc8/bin/thisroot.sh
 
     export CUDA_HOME=/usr/local/cuda-10.0
     [[ ":$LD_LIBRARY_PATH:" != *":${CUDA_HOME}/lib64:"* ]] && export LD_LIBRARY_PATH="${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}"
