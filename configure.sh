@@ -41,10 +41,10 @@ source configure.sh
 cd $ICDL_BASEDIR
 
 # # LArFlow
-#cd larflow
-#source configure.sh
-#cd larmatchnet && source set_pythonpath.sh # setup larmatch environment variables
-#cd $ICDL_BASEDIR
+cd larflow
+source configure.sh
+cd larmatchnet && source set_pythonpath.sh # setup larmatch environment variables
+cd $ICDL_BASEDIR
 
 # # LArdly viewing tools
 cd lardly
