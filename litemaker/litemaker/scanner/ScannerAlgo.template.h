@@ -1365,6 +1365,7 @@ namespace larlite {
     }
   }
 
+#ifdef ICARUS
   template <>
   void ScannerAlgo::ScanData(std::vector< ::sbn::crt::CRTTrack> const &dh,
 			     //art::Handle<::raw::DAQHeaderTimeUBooNE> const &ddh,
@@ -1458,6 +1459,7 @@ namespace larlite {
       lite_data->push_back(lite_hit);
     }
   }
+#endif // ICARUS DEFINE
 
   template <class T>
   void ScanData(art::Handle<std::vector<T> > const &dh,
@@ -1685,7 +1687,8 @@ namespace larlite {
     if(fPtrIndex_fmatch[key1].size()<=key2) fPtrIndex_fmatch[key1].resize(key2+1);
     return fPtrIndex_fmatch[key1][key2]; 
   }
-  
+
+#ifdef ICARUS  
   template <> std::map<art::Ptr< ::sbn::crt::CRTHit>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
     { if(fPtrIndex_crthit.size()<=key1) fPtrIndex_crthit.resize(key1+1);
       if(fPtrIndex_crthit[key1].size()<=key2) fPtrIndex_crthit[key1].resize(key2+1);
@@ -1697,6 +1700,7 @@ namespace larlite {
       if(fPtrIndex_crttrack[key1].size()<=key2) fPtrIndex_crttrack[key1].resize(key2+1);
       return fPtrIndex_crttrack[key1][key2];
     }
+#endif
 
   template <class T>
   std::map<art::Ptr<T>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
@@ -1777,10 +1781,12 @@ namespace larlite {
   { return ::larlite::data::kFlashMatch; }
 
   // crt
+#ifdef ICARUS
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::sbn::crt::CRTHit> () const
     { return ::larlite::data::kCRTHit; }
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::sbn::crt::CRTTrack> () const
     { return ::larlite::data::kCRTTrack; }
+#endif
 
   // MuCS
   /* template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::MuCS::MuCSData> () const */

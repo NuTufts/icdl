@@ -1,5 +1,24 @@
 cmake_minimum_required(VERSION 3.10)
+find_package(cetmodules 3.20.00 REQUIRED)
+
 project(litemaker VERSION 1.0.0)
+
+include(CetCMakeEnv)
+cet_cmake_env()
+
+#--- Are we ICARUS, SBND, UBOONE? ---
+if (DEFINED ENV{SBNDCODE_DIR})
+  set( EXPERIMENT "SBND" )
+  message( STATUS "Experiment: SBND" )
+elseif (DEFINED ENV{ICARUSCODE_DIR})
+  set( EXPERIMENT "ICARUS" )
+  message( STATUS "Experiment: ICARUS" )
+elseif (DEFINED  ENV{UBOONECODE_DIR})
+  set( EXPERIMENT "UBOONE" )
+  message( STATUS "Experiment: UBOONE" )
+else()
+  message( FATAL_ERROR "Did not detect any of the experiment codebases have been setup. use UPS 'setup uboonecode/sbndcode/icaruscode'")
+endif()
 
 #---Install location by default is in the build directory
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -59,8 +78,10 @@ find_package( larlite REQUIRED )
 find_package(PkgConfig)
 pkg_check_modules(SQLite3 REQUIRED sqlite3)
 set( SQLite3_LIBRARY $ENV{SQLITE_LIB}/libsqlite3_ups.so )
+pkg_check_modules(clhep-geometry REQUIRED clhep-geometry)
+message( STATUS "clhep-geometry libraries: " ${clhep-geometry_LIBRARIES} )
 find_package( Boost REQUIRED )
-find_package( Range )
+find_package( Range-v3 )
 find_package( cetlib REQUIRED QUIET )
 find_package( cetlib_except REQUIRED QUIET )
 find_package( messagefacility REQUIRED QUIET )
@@ -68,7 +89,6 @@ find_package( art REQUIRED QUIET )
 find_package( hep_concurrency REQUIRED QUIET )
 find_package( canvas REQUIRED QUIET )
 find_package( gallery REQUIRED QUIET )
-#find_package( icarusalg REQUIRED QUIET )
 find_package( lardataobj REQUIRED QUIET )
 find_package( lardata REQUIRED QUIET )
 find_package( lardataalg REQUIRED QUIET )
@@ -79,7 +99,7 @@ find_package( ifdhc REQUIRED QUIET )
 find_package( nusimdata REQUIRED QUIET )
 find_package( sbnobj REQUIRED QUIET )
 #find_package( larsim REQUIRED QUIET )
-
+#clhep-geometry
 
 ## Setup
 

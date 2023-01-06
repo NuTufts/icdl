@@ -17,6 +17,14 @@ add_library(${LIBNAME} SHARED
   UtilScannerAlgo.cxx
 )
 
+if ( EXPERIMENT STREQUAL "ICARUS" )
+  target_compile_definitions( ${LIBNAME} PUBLIC ICARUS )
+elseif ( EXPERIMENT STREQUAL "SBND" )
+  target_compile_definitions( ${LIBNAME} PUBLIC SBND )
+elseif ( EXPERIMENT STREQUAL "UBOONE" )
+  target_compile_definitions( ${LIBNAME} PUBLIC UBOONE )
+endif()
+
 # includes
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_SOURCE_DIR} )
 include_directories( ${fhiclcpp_INCLUDE_DIRS} )
@@ -83,7 +91,8 @@ target_link_libraries(${LIBNAME} PUBLIC
   lardata::DetectorInfoServices_DetectorPropertiesServiceStandard_service
   lardata::DetectorInfoServices_LArPropertiesServiceStandard_service
   lardataalg::DetectorInfo
-  sbnobj::Common_CRT  
+  sbnobj::Common_CRT
+  ${clhep-geometry_LINK_LIBRARIES}
   canvas::canvas
   ${ROOT_LIBRARIES})
 
@@ -94,7 +103,7 @@ install(TARGETS ${LIBNAME}
   PUBLIC_HEADER DESTINATION include/litemaker/${MODULE_NAME})
 
 # install files needed for dictionary use in CINT/CLING/PYTHON
-install( FILES
-  ${CMAKE_CURRENT_BINARY_DIR}/lib${LIBNAME}_rdict.pcm
-  ${CMAKE_CURRENT_BINARY_DIR}/lib${LIBNAME}.rootmap
-  DESTINATION lib  )
+#install( FILES
+#  ${CMAKE_CURRENT_BINARY_DIR}/lib${LIBNAME}_rdict.pcm
+#  ${CMAKE_CURRENT_BINARY_DIR}/lib${LIBNAME}.rootmap
+#  DESTINATION $<INSTALL_INTERFACE:lib>  )
