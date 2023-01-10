@@ -22,6 +22,14 @@ Machine learning algorithms are also in use by this library. These include the f
 * SSNet: 2D pixel-labeling
 * Sparse-MaskRCNN: (to be added)
 
+## Current branches used in each repo
+
+* larlite: `feature/tmw_larutil_geo_update`
+* larcv: `develop`
+* ublarcvapp: `tmw_icdl`
+* larflow: `dlgen2_icdl`
+* lardly: `master`
+
 ## Building
 
 Go to the [Wiki](https://github.com/NuTufts/icdl/wiki) to find info on building and other tutorials.
