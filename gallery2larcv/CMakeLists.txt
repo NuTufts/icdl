@@ -3,9 +3,6 @@ find_package(cetmodules 3.20.00 REQUIRED)
 
 project(gallery2larcv CXX)
 
-#---Target executable we are building
-add_executable(gallery2larcv gallery2larcv.cxx)
-
 include(CetCMakeEnv)
 cet_cmake_env()
 
@@ -17,15 +14,15 @@ list(APPEND CMAKE_MODULE_PATH "$ENV{IFDHC_LIB}/ifdhc/cmake")
 if (DEFINED ENV{SBNDCODE_DIR})
   set( EXPERIMENT "SBND" )
   message( STATUS "Experiment: SBND" )
-  target_compile_definitions( gallery2larcv PUBLIC SBND )
+  #target_compile_definitions( gallery2larcv PUBLIC SBND )
 elseif (DEFINED ENV{ICARUSCODE_DIR})
   set( EXPERIMENT "ICARUS" )
   message( STATUS "Experiment: ICARUS" )
-  target_compile_definitions( gallery2larcv PUBLIC ICARUS )
+  #target_compile_definitions( gallery2larcv PUBLIC ICARUS )
 elseif (DEFINED  ENV{UBOONECODE_DIR})
   set( EXPERIMENT "UBOONE" )
   message( STATUS "Experiment: UBOONE" )
-  target_compile_definitions( gallery2larcv PUBLIC UBOONE )
+  #target_compile_definitions( gallery2larcv PUBLIC UBOONE )
 else()
   message( FATAL_ERROR "Did not detect any of the experiment codebases have been setup. use UPS 'setup uboonecode/sbndcode/icaruscode'")
 endif()
@@ -66,7 +63,6 @@ find_package( nusimdata REQUIRED QUIET )
 # To set the C++ standard to be used, only one of the following two lines should
 # be un-commented.
 #set_property(TARGET demo PROPERTY CXX_STANDARD 14)
-set_property(TARGET gallery2larcv PROPERTY CXX_STANDARD 17)
 
 include_directories( ${fhiclcpp_INCLUDE_DIRS} )
 include_directories( ${canvas_INCLUDE_DIRS} )
@@ -122,5 +118,7 @@ set( LARLITE_LIBS
 set( LINK_LIBS ${ART_LIBS}  ${LARLITE_LIBS} LArCVCoreDataFormat ${ROOT_LIBRARIES} )
 
 #target_link_libraries(demo ${LINK_LIBS} )
-target_link_libraries(gallery2larcv ${LINK_LIBS})
+
+add_subdirectory(gallery2larcv)
+
 

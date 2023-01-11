@@ -1,6 +1,6 @@
 /**
  * @file    gallery2larcv.cpp
- * @brief   Simple conversion of ICARUS larsoft file into DL formats (larcv, larlite)
+ * @brief   Simple conversion of SBND larsoft file into DL formats (larcv, larlite)
  * @date    May 8, 2022
  * 
  * 
@@ -10,19 +10,14 @@
 #include "larcorealg/Geometry/StandaloneGeometrySetup.h"
 #include "larcorealg/Geometry/GeometryCore.h"
 
-#ifdef ICARUS
-#include "icarusalg/Geometry/ICARUSChannelMapAlg.h"
-#include "icarusalg/Geometry/LoadStandardICARUSgeometry.h"
-#endif
-#ifdef SBND
 #include "sbndcode/Geometry/ChannelMapSBNDAlg.h"
-#endif
 
 // - configuration
 #include "larcorealg/Geometry/StandaloneBasicSetup.h"
 // - data objects
 #include "lardataobj/RecoBase/Wire.h"
 #include "lardataobj/RecoBase/OpFlash.h"
+#include "lardataobj/Simulation/SimChannel.h"
 
 // // gallery/canvas
 #include "fhiclcpp/ParameterSet.h"
@@ -76,10 +71,11 @@ int main(int argc, char** argv) {
   std::vector<std::string> fileNames;
   std::copy(pParam, pend, std::back_inserter(fileNames));
 
-  bool HAS_MC  = false;
+  bool HAS_MC  = true;
   bool HAS_CRT = false;
   bool HAS_OPFLASH = false;
-  int  downsample_factor =  1;
+  bool HAS_RECO1 = false;
+  int  downsample_factor =  4;
 
   // read FHiCL configuration from a configuration file:
   fhicl::ParameterSet config = lar::standalone::ParseConfiguration(configFile);
@@ -88,16 +84,9 @@ int main(int argc, char** argv) {
   lar::standalone::SetupMessageFacility(config, "servicesdemo");
 
   //geometry setup
-#ifdef ICARUS
-  std::cout << "Load ICARUS Geometry" << std::endl;
-  auto geom = lar::standalone::SetupGeometry<icarus::ICARUSChannelMapAlg>(config.get<fhicl::ParameterSet>("services.Geometry"));
-  larutil::LArUtilConfig::SetDetector( larlite::geo::kICARUS );
-#endif
-#ifdef SBND
   std::cout << "Load SBND Geometry" << std::endl;
   auto geom = lar::standalone::SetupGeometry<geo::ChannelMapSBNDAlg>(config.get<fhicl::ParameterSet>("services.Geometry"));
   larutil::LArUtilConfig::SetDetector( larlite::geo::kSBND );
-#endif
 
   auto llgeom = larlite::larutil::Geometry::GetME();
   std::cout << "larlite geometry loaded" << std::endl;
@@ -118,72 +107,10 @@ int main(int argc, char** argv) {
   std::cout << "Total number of TPCs: " << nTPCs << std::endl;
   std::cout << "Total number of Planes: " << nPlanes << std::endl;
 
-  // litemaker scanner: converts larsoft data products into larlite ones
-  larlite::ScannerAlgo scanner; 
-  scanner.Register( "largeant",  larlite::data::kMCParticle );
-  scanner.Register( "generator", larlite::data::kMCTruth );
-  scanner.Register( "generator", larlite::data::kMCFlux );
-  scanner.Register( "opflashCryoE",  larlite::data::kOpFlash );
-  scanner.Register( "opflashCryoW",  larlite::data::kOpFlash );
-  scanner.Register( "crthit",        larlite::data::kCRTHit );
-  scanner.Register( "crttrack",      larlite::data::kCRTTrack );
+  // ==== LARSOFT PRODUCTS ===============
+  // Make a list of larsoft products we want to translate into larlite
 
-  larlite::storage_manager llout( larlite::storage_manager::kWRITE );
-  llout.set_out_filename( "out_larlite.root" );
-  llout.open();
-
-  // get parameters needed for image making
-  unsigned int max_wires_per_plane   = geom->MaxWires();
-  std::cout << "max wires per plane: " << max_wires_per_plane << std::endl;  
-
-  std::vector<std::string> allInputFiles
-    //= { "../../testdata/mcc2021b_bnbnu/prodcorsika_bnb_genie_protononly_overburden_icarus_gen_filter_g4_detsim_24027129_667_reco1.root"};
-    //= {"/icarus/data/users/tmw/first_mc_files/prodcorsika_bnb_genie_protononly_overburden_icarus_gen_filter_g4_detsim_24027129_667_reco1.root"};
-    //= {"/icarus/data/users/tmw/first_mc_files/missing_hits_examples/BNB_run7033_11c_neutrinos_BNB_20211129T012418-stage0.root"};
-    = {"/sbnd/data/users/tmw/first_mc_files/prodgenie_bnb_nu_cosmic_sbnd_GenieGen-20230105T062907_G4-20230105T064510_DetSim-20230105T065105_Reco1-20230106T021301.root"};
-
-  // OUTPUT SETUP
-  larcv::IOManager iolcv( larcv::IOManager::kWRITE );
-  iolcv.set_out_file( "out_larcv.root" );
-  iolcv.initialize();
-
-  int numEvents(0);
-
-  // data tags we want to extract
-#ifdef ICARUS
-  //std::string wireproducer = "daqTPCROI";
-  std::string wireproducer = "roifinder";
-  std::string stage_name = "stage0";
-  //std::string stage_name = "MCstage0";
-  std::vector< art::InputTag > wire_tag_v
-    = {   art::InputTag(wireproducer,"PHYSCRATEDATATPCEW",stage_name),
-	  art::InputTag(wireproducer,"PHYSCRATEDATATPCEE",stage_name),
-	  art::InputTag(wireproducer,"PHYSCRATEDATATPCWE",stage_name),
-	  art::InputTag(wireproducer,"PHYSCRATEDATATPCWW",stage_name) };
-
-  art::InputTag const mcparticle_tag("largeant","","G4");
-  art::InputTag const mctruth_tag("generator","","GenBNBbkgr");
-  art::InputTag const mcflux_tag("generator","","GenBNBbkgr");
-  art::InputTag const gtruth_tag("generator","","GenBNBbkgr");
-  art::InputTag const crttrack_tag("crttrack","",stage_name);
-  art::InputTag const crthit_tag("crthit","",stage_name);
-  art::InputTag const opflashE_tag("opflashCryoE","",stage_name);
-  art::InputTag const opflashW_tag("opflashCryoW","",stage_name);
-#endif
-
-#ifdef SBND
-
-  // DetSim...... | crt........... | ................................................... | art::Assns<sbnd::crt::CRTData,sim::AuxDetIDE,void>................... | ...634
-  //   DetSim...... | opdaq......... | ................................................... | std::vector<raw::OpDetWaveform>...................................... | ..4526
-  //   DetSim...... | rns........... | ................................................... | std::vector<art::RNGsnapshot>........................................ | .....2
-  //   DetSim...... | crt........... | ................................................... | std::vector<sbnd::crt::CRTData>...................................... | ...508
-  //   DetSim...... | crtsim........ | ................................................... | art::Assns<sbnd::crt::FEBData,sim::AuxDetIDE,sbnd::crt::FEBTruthInfo> | ...379
-  //   DetSim...... | daq........... | ................................................... | std::vector<raw::RawDigit>........................................... | .11224
-  //   DetSim...... | crtsim........ | ................................................... | std::vector<sim::AuxDetIDE>.......................................... | ...379
-  //   DetSim...... | TriggerResults | ................................................... | art::TriggerResults.................................................. | .....1
-  //   DetSim...... | crtsim........ | ................................................... | std::vector<sbnd::crt::FEBData>...................................... | ...253
-  //   DetSim...... | crt........... | ................................................... | art::Assns<sbnd::crt::CRTData,sbnd::crt::FEBData,void>............... | ...508
-
+  // Deconvolved wire signals
   std::string wireproducer = "Reco1";
   std::string stage_name = "caldata";
   std::vector< std::string > wire_tagname_v = {""};
@@ -195,18 +122,57 @@ int main(int argc, char** argv) {
   }
 
   // generator stage
-  art::InputTag const mcparticle_tag("largeant","","G4");
-  art::InputTag const mctruth_tag("generator","","GenBNBbkgr");
-  art::InputTag const mcflux_tag("generator","","GenBNBbkgr");
-  art::InputTag const gtruth_tag("generator","","GenBNBbkgr");
+  art::InputTag const mctruth_genie_tag("generator","","GenieGen");
+  art::InputTag const mctruth_corsika_tag("corsika","","GenieGen");
+  art::InputTag const mcflux_tag("generator","","GenieGen");
+  art::InputTag const gtruth_tag("generator","","GenieGen");
+  // g4 stage
+  art::InputTag const simch_tag("simdrift","","G4");
+  art::InputTag const mcreco_track_tag("mcreco","","G4");
+  art::InputTag const mcreco_shower_tag("mcreco","","G4");
+  // DetSim
+  art::InputTag const opdaq_tag("opdaq","","DetSim");
   // reco 1
-  art::InputTag const crttrack_tag("crttrack","",stage_name);
-  art::InputTag const crthit_tag("crthit","",stage_name);
-  art::InputTag const opflashE_tag("opflashCryoE","",stage_name);
-  art::InputTag const opflashW_tag("opflashCryoW","",stage_name);
-#endif
-
+  art::InputTag const gaushit_tag("gaushit","","Reco1");
   
+
+  // ==== LARLITE SCANNER ====================
+  // litemaker scanner: converts larsoft data products into larlite ones
+
+  larlite::ScannerAlgo scanner; 
+
+  // generator
+  scanner.Register( "generator", larlite::data::kMCTruth );
+  scanner.Register( "generator", larlite::data::kMCFlux );
+  scanner.Register( "generator", larlite::data::kGTruth );
+  // G4
+  scanner.Register( "largeant",  larlite::data::kMCParticle );
+  scanner.Register( "simdrift",  larlite::data::kSimChannel );
+  scanner.Register( "mcreco",    larlite::data::kMCTrack );
+  scanner.Register( "mcreco",    larlite::data::kMCShower );
+  // Detsim
+  scanner.Register( "opdaq",     larlite::data::kOpDetWaveform );
+  // Reco 1
+  scanner.Register( "gaushit" ,  larlite::data::kHit );
+
+  larlite::storage_manager llout( larlite::storage_manager::kWRITE );
+  llout.set_out_filename( "out_larlite.root" );
+  llout.open();
+
+  // get parameters needed for image making
+  unsigned int max_wires_per_plane   = geom->MaxWires();
+  std::cout << "max wires per plane: " << max_wires_per_plane << std::endl;  
+
+  std::vector<std::string> allInputFiles
+    = {"/sbnd/data/users/tmw/test_data/2022A_rockbox/gen_g4_detsim_reco1-69432ad3-6cd6-4591-be56-7fc0adb2c2f1.root"};
+
+  // OUTPUT SETUP
+  larcv::IOManager iolcv( larcv::IOManager::kWRITE );
+  iolcv.set_out_file( "out_larcv.root" );
+  iolcv.initialize();
+
+  int numEvents(0);
+
   std::cout << "start event loop" << std::endl;
 
   /*
@@ -221,7 +187,7 @@ int main(int argc, char** argv) {
       // ***  SINGLE EVENT PROCESSING BEGIN  *************************************
       // *************************************************************************
       
-      mf::LogVerbatim("gallery2larcv") << "This is event " << event.fileEntry() << "-" << event.eventEntry();
+      mf::LogVerbatim("gallery2larcv_sbnd") << "This is event " << event.fileEntry() << "-" << event.eventEntry();
 
       auto ev_wireout = (larcv::EventImage2D*)iolcv.get_data(larcv::kProductImage2D,"wire");
 
@@ -240,17 +206,25 @@ int main(int argc, char** argv) {
 	}
 
       }
-	  
       std::cout << "Max ticks per channel: " << max_ticks_per_channel << std::endl;
-      
+	  
+      int output_nticks = max_ticks_per_channel/downsample_factor;
+      int output_nticks_pre = max_ticks_per_channel;
+      if ( downsample_factor>1 && max_ticks_per_channel%downsample_factor!=0 ) {
+	output_nticks += 1;
+	output_nticks_pre = downsample_factor*output_nticks;
+      }
+      std::cout << "Output ticks per channel, fit with downsampler : " << output_nticks << std::endl;
+      std::cout << "Output ticks per channel, pre-downsampler : " << output_nticks_pre << std::endl;
+
       // we allocate the space for the images.
       for (int icryo=0; icryo<(int)llgeom->Ncryostats(); icryo++ ) {
 	for (int itpc=0; itpc<(int)llgeom->NTPCs(icryo); itpc++) {
 	  for (int iplane=0; iplane<(int)llgeom->Nplanes(itpc,icryo); iplane++) {
 	    int index = llgeom->GetSimplePlaneIndexFromCTP( icryo, itpc, iplane );
 
-	    larcv::ImageMeta meta( max_wires_per_plane, max_ticks_per_channel, 
-				   (int)max_ticks_per_channel, (int)max_wires_per_plane,
+	    larcv::ImageMeta meta( max_wires_per_plane, output_nticks_pre,
+				   (int)output_nticks_pre, (int)max_wires_per_plane,
 				   0.0, 0.0, index );
 	    larcv::Image2D img(meta);
 	    img.paint(0.0);
@@ -288,7 +262,7 @@ int main(int argc, char** argv) {
 	    //if ( signal.size()>max_ticks_per_channel ) {
 	    //std::cout << "CH " << channel << ": num wires=" << wire_v.size() << " num ticks=" << signal.size() << std::endl;
 	    //}
-	    img.copy( 0, wid, signal, std::min((int)signal.size(),(int)max_ticks_per_channel) );
+	    img.copy( 0, wid, signal, std::min((int)signal.size(),(int)output_nticks_pre) );
 	    //std::cout << "CH " << channel << ": no wires=" << wire_v.size() << std::endl;
 	  }
 	  //std::cout << "max signal size: " << nmaxsignal << std::endl;
@@ -299,7 +273,7 @@ int main(int argc, char** argv) {
 
 	// compress image first
 	if ( downsample_factor>1  )
-	  img.compress( max_ticks_per_channel/downsample_factor, max_wires_per_plane, larcv::Image2D::kSum );
+	  img.compress( output_nticks, max_wires_per_plane, larcv::Image2D::kSum );
 	
 	int nabove = 0;
 	for ( auto const& pixval : img.as_vector() ) {
@@ -322,56 +296,67 @@ int main(int argc, char** argv) {
       
       // larlite products
       if ( HAS_MC ) {
-	auto pMCParticleVec = event.getValidHandle< std::vector<simb::MCParticle> >(mcparticle_tag);
-	larlite::event_mcpart* ev_mcpart = 
-	  (larlite::event_mcpart*)llout.get_data( larlite::data::kMCParticle, "largeant" );
-	scanner.ScanData( *pMCParticleVec, ev_mcpart );
 
-	auto pMCTruthVec = event.getValidHandle< std::vector<simb::MCTruth> >(mctruth_tag);
+	auto pMCTruthVec = event.getValidHandle< std::vector<simb::MCTruth> >(mctruth_genie_tag);
 	larlite::event_mctruth* ev_mctruth = 
 	  (larlite::event_mctruth*)llout.get_data( larlite::data::kMCTruth, "generator" );
 	scanner.ScanData( *pMCTruthVec, ev_mctruth );
 
-	auto pMCFluxVec = event.getValidHandle< std::vector<simb::MCFlux> >(mctruth_tag);
+	auto pMCFluxVec = event.getValidHandle< std::vector<simb::MCFlux> >(mcflux_tag);
 	larlite::event_mcflux* ev_mcflux = 
 	  (larlite::event_mcflux*)llout.get_data( larlite::data::kMCFlux, "generator" );
 	scanner.ScanData( *pMCFluxVec, ev_mcflux );
 
-	auto pGTruthVec = event.getValidHandle< std::vector<simb::GTruth> >(mctruth_tag);
+	auto pGTruthVec = event.getValidHandle< std::vector<simb::GTruth> >(gtruth_tag);
 	larlite::event_gtruth* ev_gtruth = 
 	  (larlite::event_gtruth*)llout.get_data( larlite::data::kGTruth, "generator" );
 	scanner.ScanData( *pGTruthVec, ev_gtruth );
+
+	auto pMCRecoTrack = event.getValidHandle< std::vector<sim::MCTrack> >( mcreco_track_tag );
+	larlite::event_mctrack* ev_mctrack =
+	  (larlite::event_mctrack*)llout.get_data( larlite::data::kMCTrack, "mcreco" );
+	scanner.ScanData( *pMCRecoTrack, (larlite::event_base*)ev_mctrack );
+
+	auto pMCRecoShower = event.getValidHandle< std::vector<sim::MCShower> >( mcreco_track_tag );
+	larlite::event_mcshower* ev_mcshower =
+	  (larlite::event_mcshower*)llout.get_data( larlite::data::kMCShower, "mcreco" );
+	scanner.ScanData( *pMCRecoShower, (larlite::event_base*)ev_mcshower );
+
+	auto pSimCh = event.getValidHandle< std::vector<sim::SimChannel> >( simch_tag );
+	larlite::event_simch* ev_simch =
+	  (larlite::event_simch*)llout.get_data( larlite::data::kSimChannel, "simdrift" );
+	scanner.ScanData( *pSimCh, (larlite::event_base*)ev_simch );
       }
 
       // opflash
       if ( HAS_OPFLASH ) {
-#ifdef ICARUS
-      auto popflashE = event.getValidHandle< std::vector<recob::OpFlash> >( opflashE_tag );
-      auto popflashW = event.getValidHandle< std::vector<recob::OpFlash> >( opflashW_tag );
-      larlite::event_opflash* ev_opflashE
-	= (larlite::event_opflash*)llout.get_data( larlite::data::kOpFlash, "opflashCryoE" );
-      scanner.ScanData( *popflashE, ev_opflashE );
-      larlite::event_opflash* ev_opflashW
-	= (larlite::event_opflash*)llout.get_data( larlite::data::kOpFlash, "opflashCryoW" );
-      scanner.ScanData( *popflashW, ev_opflashW );
-#endif
+// #ifdef ICARUS
+//       auto popflashE = event.getValidHandle< std::vector<recob::OpFlash> >( opflashE_tag );
+//       auto popflashW = event.getValidHandle< std::vector<recob::OpFlash> >( opflashW_tag );
+//       larlite::event_opflash* ev_opflashE
+// 	= (larlite::event_opflash*)llout.get_data( larlite::data::kOpFlash, "opflashCryoE" );
+//       scanner.ScanData( *popflashE, ev_opflashE );
+//       larlite::event_opflash* ev_opflashW
+// 	= (larlite::event_opflash*)llout.get_data( larlite::data::kOpFlash, "opflashCryoW" );
+//       scanner.ScanData( *popflashW, ev_opflashW );
+// #endif
       }
 
       // CRT
       if ( HAS_CRT ) {
-#ifdef ICARUS
-	auto pcrthit = event.getValidHandle< std::vector<sbn::crt::CRTHit> >( crthit_tag );
-	larlite::event_crthit* ev_crthit
-	  = (larlite::event_crthit*)llout.get_data( larlite::data::kCRTHit, "crthit" );
-	scanner.ScanData( *pcrthit, ev_crthit );
+// #ifdef ICARUS
+// 	auto pcrthit = event.getValidHandle< std::vector<sbn::crt::CRTHit> >( crthit_tag );
+// 	larlite::event_crthit* ev_crthit
+// 	  = (larlite::event_crthit*)llout.get_data( larlite::data::kCRTHit, "crthit" );
+// 	scanner.ScanData( *pcrthit, ev_crthit );
 
-	auto pcrttrack = event.getValidHandle< std::vector<sbn::crt::CRTTrack> >( crttrack_tag );
-	larlite::event_crttrack* ev_crttrack
-	  = (larlite::event_crttrack*)llout.get_data( larlite::data::kCRTTrack, "crttrack" );
-	scanner.ScanData( *pcrttrack, ev_crttrack );
-#endif
+// 	auto pcrttrack = event.getValidHandle< std::vector<sbn::crt::CRTTrack> >( crttrack_tag );
+// 	larlite::event_crttrack* ev_crttrack
+// 	  = (larlite::event_crttrack*)llout.get_data( larlite::data::kCRTTrack, "crttrack" );
+// 	scanner.ScanData( *pcrttrack, ev_crttrack );
+// #endif
       }
-
+      
       llout.set_id( 0, 0, ientry );
       llout.next_event();
       // define a meta
@@ -379,9 +364,12 @@ int main(int argc, char** argv) {
       // we write output
       // if (true)
       // 	break;
-    }
 
-    
+      if ( ientry>=10 )
+	break;
+    }//end of event loop
+
+  
   //geom->Print(std::cout);
   iolcv.finalize();
   llout.close();
