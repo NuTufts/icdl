@@ -43,6 +43,8 @@
 #include "lardataobj/Simulation/SimChannel.h"
 #include "lardataobj/Simulation/SimPhotons.h"
 #include "lardataobj/Simulation/AuxDetSimChannel.h"
+#include "lardataobj/Simulation/SimEnergyDeposit.h"
+#include "lardataobj/Simulation/SimEnergyDepositLite.h"
 #include "nusimdata/SimulationBase/MCFlux.h"
 #include "nusimdata/SimulationBase/GTruth.h"
 #include "nusimdata/SimulationBase/MCTruth.h"

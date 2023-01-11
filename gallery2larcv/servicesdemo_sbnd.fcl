@@ -1,0 +1,7 @@
+#include "services_sbnd.fcl"
+
+#services: @local::sbnd_services
+services: @local::sbnd_basic_services
+#services.Geometry.DisableWiresInG4: false
+#services.Geometry.GDML: "icarus_complete_20210527_overburden_nowires.gdml"
+#services.Geometry.ROOT: "icarus_complete_20210527_overburden_nowires.gdml"

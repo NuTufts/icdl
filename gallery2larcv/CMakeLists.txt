@@ -1,19 +1,51 @@
 cmake_minimum_required(VERSION 3.6)
+find_package(cetmodules 3.20.00 REQUIRED)
+
 project(gallery2larcv CXX)
+
+#---Target executable we are building
+add_executable(gallery2larcv gallery2larcv.cxx)
+
+include(CetCMakeEnv)
+cet_cmake_env()
 
 #---Module directory
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 list(APPEND CMAKE_MODULE_PATH "$ENV{IFDHC_LIB}/ifdhc/cmake")
 
-# dependency hell
+#--- Are we ICARUS, SBND, UBOONE? ---
+if (DEFINED ENV{SBNDCODE_DIR})
+  set( EXPERIMENT "SBND" )
+  message( STATUS "Experiment: SBND" )
+  target_compile_definitions( gallery2larcv PUBLIC SBND )
+elseif (DEFINED ENV{ICARUSCODE_DIR})
+  set( EXPERIMENT "ICARUS" )
+  message( STATUS "Experiment: ICARUS" )
+  target_compile_definitions( gallery2larcv PUBLIC ICARUS )
+elseif (DEFINED  ENV{UBOONECODE_DIR})
+  set( EXPERIMENT "UBOONE" )
+  message( STATUS "Experiment: UBOONE" )
+  target_compile_definitions( gallery2larcv PUBLIC UBOONE )
+else()
+  message( FATAL_ERROR "Did not detect any of the experiment codebases have been setup. use UPS 'setup uboonecode/sbndcode/icaruscode'")
+endif()
+     
+
+# welcome to dependency hell
 find_package(PkgConfig)
-pkg_check_modules(SQLite3 REQUIRED sqlite3)
 set( SQLite3_LIBRARY $ENV{SQLITE_LIB}/libsqlite3_ups.so )
+pkg_check_modules(SQLite3 REQUIRED sqlite3)
 find_package( Boost REQUIRED )
 find_package( ROOT REQUIRED )
 set( Range_DIR $CMAKE_CURRENT_SOURCE_DIR )
-find_package( Range )
-find_package( icarusalg REQUIRED QUIET )
+find_package( Range-v3 )
+
+if ( EXPERIMENT STREQUAL "ICARUS" )
+   find_package( icarusalg REQUIRED )
+elseif (EXPERIMENT STREQUAL "SBND" )
+   find_package( sbndcode REQUIRED ) 
+endif()
+
 find_package( canvas REQUIRED QUIET )
 find_package( gallery REQUIRED QUIET )
 find_package( art REQUIRED QUIET )
@@ -31,8 +63,6 @@ find_package( litemaker REQUIRED )
 find_package( ifdhc REQUIRED QUIET )
 find_package( nusimdata REQUIRED QUIET )
 
-add_executable(gallery2larcv gallery2larcv.cxx)
-
 # To set the C++ standard to be used, only one of the following two lines should
 # be un-commented.
 #set_property(TARGET demo PROPERTY CXX_STANDARD 14)
@@ -46,7 +76,12 @@ include_directories( ${messagefacility_INCLUDE_DIRS} )
 include_directories( ${lardataobj_INCLUDE_DIRS} )
 include_directories( ${larcorealg_INCLUDE_DIRS} )
 include_directories( ${larcorealg_INCLUDE_DIRS} )
-include_directories( ${icarusalg_INCLUDE_DIRS} )
+if ( EXPERIMENT} STREQUAL "ICARUS" )
+  include_directories( ${icarusalg_INCLUDE_DIRS} )
+elseif( EXPERIMENT} STREQUAL "ICARUS" )
+  include_directories( ${sbndcode_INCLUDE_DIRS} )
+endif()
+
 include_directories( ${LARLITE_INCLUDE_DIR} )
 include_directories( ${LARCV_INCLUDE_DIR} )
 include_directories( ${LITEMAKER_INCLUDE_DIR} )
@@ -61,7 +96,6 @@ set( ART_LIBS
   gallery::gallery 
   canvas::canvas 
   larcorealg::Geometry 
-  icarusalg::Geometry 
   art::Persistency_Provenance
   art::Persistency_Common
   art::Framework_Principal
@@ -69,10 +103,16 @@ set( ART_LIBS
   lardataobj::RecoBase
   lardataobj::RawData
   lardataobj::AnalysisBase
-  lardataobj::OpticalDetectorData
+  lardataobj::OpticalDetectorData_dict
   lardataobj::MCBase
   lardataalg::DetectorInfo
 )
+if ( EXPERIMENT STREQUAL "ICARUS" )
+   list( APPEND ART_LIBS icarusalg::Geometry  )
+elseif ( EXPERIMENT STREQUAL "SBND" )
+   list( APPEND ART_LIBS sbndcode::Geometry  )
+endif()
+
 set( LARLITE_LIBS
      larlite_LArUtil
      larlite_Base
