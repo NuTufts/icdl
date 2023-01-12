@@ -3,16 +3,30 @@ set(MODULE_NAME scanner)
 set( LIBNAME litemaker_${MODULE_NAME} )
 
 # Collect the headers
-set( HEADERS ScannerAlgo.h 
+set( HEADERS 
+  SubRunNavigator.h
+  SubRunHistoryGetter.h
+  SubRunDataGetterHelper.h
+  SubRun.h
+  ScannerAlgo.h 
   ScannerAlgo.template.h
   UtilScannerAlgo.h
 )
 
-set( DICT_HEADERS ScannerAlgo.h 
+set( DICT_HEADERS 
+  SubRunNavigator.h
+  SubRunHistoryGetter.h
+  SubRunDataGetterHelper.h
+  SubRun.h
+  ScannerAlgo.h 
   UtilScannerAlgo.h
 )
 
 add_library(${LIBNAME} SHARED
+  SubRunNavigator.cc
+  SubRunHistoryGetter.cxx
+  SubRunDataGetterHelper.cxx
+  SubRun.cxx
   ScannerAlgo.cxx
   UtilScannerAlgo.cxx
 )

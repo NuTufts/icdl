@@ -18,6 +18,7 @@
 #include "lardataobj/RecoBase/Wire.h"
 #include "lardataobj/RecoBase/OpFlash.h"
 #include "lardataobj/Simulation/SimChannel.h"
+#include "larcoreobj/SummaryData/POTSummary.h"
 
 // // gallery/canvas
 #include "fhiclcpp/ParameterSet.h"
@@ -38,12 +39,17 @@
 #include "larlite/DataFormat/mctruth.h"
 #include "larlite/DataFormat/mcflux.h"
 #include "larlite/DataFormat/gtruth.h"
+#include "larlite/DataFormat/simenergydeposit.h"
+#include "larlite/DataFormat/simch.h"
 #include "larlite/DataFormat/opflash.h"
+#include "larlite/DataFormat/hit.h"
 #include "larlite/DataFormat/crttrack.h"
 #include "larlite/DataFormat/crthit.h"
+#include "larlite/DataFormat/potsummary.h"
 
 // litemaker
 #include "litemaker/scanner/ScannerAlgo.h"
+#include "litemaker/scanner/SubRun.h"
 
 // ROOT
 #include "TFile.h"
@@ -74,7 +80,7 @@ int main(int argc, char** argv) {
   bool HAS_MC  = true;
   bool HAS_CRT = false;
   bool HAS_OPFLASH = false;
-  bool HAS_RECO1 = false;
+  bool HAS_RECO1 = true;
   int  downsample_factor =  4;
 
   // read FHiCL configuration from a configuration file:
@@ -121,11 +127,15 @@ int main(int argc, char** argv) {
     wire_tag_v.push_back( wire_tag );
   }
 
+  // POT summary
+  std::vector<std::string> fPOTSummaryLabel_v = {"sumdata"};
+
   // generator stage
   art::InputTag const mctruth_genie_tag("generator","","GenieGen");
   art::InputTag const mctruth_corsika_tag("corsika","","GenieGen");
   art::InputTag const mcflux_tag("generator","","GenieGen");
   art::InputTag const gtruth_tag("generator","","GenieGen");
+  art::InputTag const pot_tag("generate","","GenieGen");
   // g4 stage
   art::InputTag const simch_tag("simdrift","","G4");
   art::InputTag const mcreco_track_tag("mcreco","","G4");
@@ -134,6 +144,8 @@ int main(int argc, char** argv) {
   art::InputTag const opdaq_tag("opdaq","","DetSim");
   // reco 1
   art::InputTag const gaushit_tag("gaushit","","Reco1");
+  art::InputTag const opflash_tpc0_tag("opflashtpc0","","Reco1");
+  art::InputTag const opflash_tpc1_tag("opflashtpc1","","Reco1");
   
 
   // ==== LARLITE SCANNER ====================
@@ -173,11 +185,44 @@ int main(int argc, char** argv) {
 
   int numEvents(0);
 
-  std::cout << "start event loop" << std::endl;
+  std::cout << "start subrun loop" << std::endl;
+  int subrun_ientry = -1;
+  for (gallery::SubRun subrun(allInputFiles); !subrun.atEnd(); subrun.next())
+    {
+      subrun_ientry++;
+      std::cout << "SubRun Entry[" << subrun_ientry << "]" << std::endl;
+
+      // POTSummary
+      for(auto const& label : fPOTSummaryLabel_v) {
+       	auto lite_data = (::larlite::potsummary*)(llout.get_subrundata(::larlite::data::kPOTSummary,label));
+	
+      	//art::Handle< sumdata::POTSummary > potHandle;
+      	gallery::Handle< sumdata::POTSummary > potHandle;
+      	subrun.getByLabel(pot_tag, potHandle);
+	
+      	if(potHandle.isValid()) {
+	  std::cout << "  valid data" << std::endl;
+      	  lite_data->totpot     = potHandle->totpot;
+      	  lite_data->totgoodpot = potHandle->totgoodpot;
+      	  lite_data->totspills  = potHandle->totspills;
+      	  lite_data->goodspills = potHandle->goodspills;
+      	}else{
+	  std::cout << "  invalid entry?" << std::endl;
+      	  lite_data->totpot     = 0;
+      	  lite_data->totgoodpot = 0;
+      	  lite_data->totspills  = 0;
+      	  lite_data->goodspills = 0;
+      	}
+      }
+    }//end of subrun loop
+  std::cout << "Number of subrun entries: " << subrun_ientry+1 << std::endl;
+  if ( true )
+    return 0;
 
   /*
    * the event loop
    */
+  std::cout << "start event loop" << std::endl;
   int ientry = -1;
   for (gallery::Event event(allInputFiles); !event.atEnd(); event.next())
     {
@@ -186,8 +231,13 @@ int main(int argc, char** argv) {
       // *************************************************************************
       // ***  SINGLE EVENT PROCESSING BEGIN  *************************************
       // *************************************************************************
+
       
       mf::LogVerbatim("gallery2larcv_sbnd") << "This is event " << event.fileEntry() << "-" << event.eventEntry();
+
+      int run = event.eventAuxiliary().eventID().run();
+      int subrun = event.eventAuxiliary().eventID().subRun();
+      int evid = event.eventAuxiliary().eventID().event();
 
       auto ev_wireout = (larcv::EventImage2D*)iolcv.get_data(larcv::kProductImage2D,"wire");
 
@@ -328,18 +378,24 @@ int main(int argc, char** argv) {
 	scanner.ScanData( *pSimCh, (larlite::event_base*)ev_simch );
       }
 
-      // opflash
-      if ( HAS_OPFLASH ) {
-// #ifdef ICARUS
-//       auto popflashE = event.getValidHandle< std::vector<recob::OpFlash> >( opflashE_tag );
-//       auto popflashW = event.getValidHandle< std::vector<recob::OpFlash> >( opflashW_tag );
-//       larlite::event_opflash* ev_opflashE
-// 	= (larlite::event_opflash*)llout.get_data( larlite::data::kOpFlash, "opflashCryoE" );
-//       scanner.ScanData( *popflashE, ev_opflashE );
-//       larlite::event_opflash* ev_opflashW
-// 	= (larlite::event_opflash*)llout.get_data( larlite::data::kOpFlash, "opflashCryoW" );
-//       scanner.ScanData( *popflashW, ev_opflashW );
-// #endif
+      // Gauss hit
+      if ( HAS_RECO1 ) {
+
+	auto pGausHit = event.getValidHandle< std::vector<recob::Hit> >( gaushit_tag );
+	larlite::event_base* ev_gaushit =
+	  llout.get_data( larlite::data::kHit, "gaushit" );
+	scanner.ScanData( *pGausHit, ev_gaushit );
+
+	auto pOpFlashTPC0 = event.getValidHandle< std::vector<recob::OpFlash> >( opflash_tpc0_tag );
+	larlite::event_base* ev_opflash_tpc0 =
+	  llout.get_data( larlite::data::kOpFlash, "opflashtpc0" );
+	scanner.ScanData( *pOpFlashTPC0, ev_opflash_tpc0 );
+
+	auto pOpFlashTPC1 = event.getValidHandle< std::vector<recob::OpFlash> >( opflash_tpc1_tag );
+	larlite::event_base* ev_opflash_tpc1 =
+	  llout.get_data( larlite::data::kOpFlash, "opflashtpc1" );
+	scanner.ScanData( *pOpFlashTPC1, ev_opflash_tpc1 );
+
       }
 
       // CRT
@@ -357,7 +413,7 @@ int main(int argc, char** argv) {
 // #endif
       }
       
-      llout.set_id( 0, 0, ientry );
+      llout.set_id( run, subrun, evid );
       llout.next_event();
       // define a meta
       // we transfer data to image
@@ -365,7 +421,7 @@ int main(int argc, char** argv) {
       // if (true)
       // 	break;
 
-      if ( ientry>=10 )
+      if ( ientry>=1 )
 	break;
     }//end of event loop
 

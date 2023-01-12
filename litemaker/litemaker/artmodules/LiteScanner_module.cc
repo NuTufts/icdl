@@ -27,11 +27,11 @@
 #include "DataFormat/potsummary.h"
 
 // LArSoft includes
-#include "ubcore/Geometry/UBOpChannelTypes.h"
-#include "ubcore/Geometry/UBOpReadoutMap.h"
-#include "ubobj/Trigger/ubdaqSoftwareTriggerData.h"
-#include "ubobj/MuCS/MuCSData.h"
-#include "ubobj/MuCS/MuCSRecoData.h"
+// #include "ubcore/Geometry/UBOpChannelTypes.h"
+// #include "ubcore/Geometry/UBOpReadoutMap.h"
+// #include "ubobj/Trigger/ubdaqSoftwareTriggerData.h"
+// #include "ubobj/MuCS/MuCSData.h"
+// #include "ubobj/MuCS/MuCSRecoData.h"
 #include "larsim/EventWeight/Base/MCEventWeight.h"
 
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
@@ -341,9 +341,8 @@ void LiteScanner::analyze(art::Event const & e)
 	ScanData<raw::OpDetWaveform>(e,j); break;
       case ::larlite::data::kTrigger:
 	ScanData<raw::Trigger>(e,j); break;
-      case ::larlite::data::kSWTrigger:
-	ScanSimpleData<raw::ubdaqSoftwareTriggerData>(e,j); break;
-
+      // case ::larlite::data::kSWTrigger:
+      // 	ScanSimpleData<raw::ubdaqSoftwareTriggerData>(e,j); break;
       case ::larlite::data::kHit:
 	ScanData<recob::Hit>(e,j); break;
       case ::larlite::data::kMCEventWeight:
@@ -603,31 +602,31 @@ template<class T> void LiteScanner::ScanData(const art::Event& evt, const size_t
 
   art::Handle<std::vector<T> > dh;
   // All cases except for optical
-  if(lite_id.first == ::larlite::data::kOpDetWaveform) {
-    art::ServiceHandle<geo::UBOpReadoutMap> ub_pmt_channel_map;
+  // if(lite_id.first == ::larlite::data::kOpDetWaveform) {
+  //   // art::ServiceHandle<geo::UBOpReadoutMap> ub_pmt_channel_map;
 
-    art::InputTag inputtag(label);
-    evt.getByLabel(inputtag, dh);
+  //   // art::InputTag inputtag(label);
+  //   // evt.getByLabel(inputtag, dh);
 
-    if(dh.isValid()) fAlg.ScanData(dh,lite_data);
+  //   // if(dh.isValid()) fAlg.ScanData(dh,lite_data);
 
-    for ( unsigned int cat=0; cat<(unsigned int)opdet::NumUBOpticalChannelCategories; cat++ ) {
+  //   // for ( unsigned int cat=0; cat<(unsigned int)opdet::NumUBOpticalChannelCategories; cat++ ) {
       
-      evt.getByLabel(label, opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat ), dh);
+  //   //   evt.getByLabel(label, opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat ), dh);
 
-      if(!dh.isValid()) continue;
+  //   //   if(!dh.isValid()) continue;
 
-      fAlg.ScanData(dh,lite_data);
+  //   //   fAlg.ScanData(dh,lite_data);
 
-    }
-  }
-  else{    
-    art::InputTag inputtag(label);
-    evt.getByLabel(inputtag, dh);
-    
-    if(!dh.isValid()) return;
-    fAlg.ScanData(dh,lite_data);
-  }
+  //   // }
+  // }
+  // else{    
+  art::InputTag inputtag(label);
+  evt.getByLabel(inputtag, dh);
+  
+  if(!dh.isValid()) return;
+  fAlg.ScanData(dh,lite_data);
+
 }
 
 //-------------------------------------------------------------------------------------------------

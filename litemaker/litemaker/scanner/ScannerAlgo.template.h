@@ -669,28 +669,34 @@ namespace larlite {
   }
 
   template <>
-  void ScannerAlgo::ScanData(art::Handle<std::vector< ::raw::OpDetWaveform> > const &dh,
+  void ScannerAlgo::ScanData(std::vector<::raw::OpDetWaveform> const &dh,
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
     //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_opdetwaveform*)lite_dh;
 
-    for(size_t i=0; i<dh->size(); i++){
+    for(size_t i=0; i<dh.size(); i++){
 
-      const art::Ptr<::raw::OpDetWaveform> opdigit_ptr(dh,i);
+      const ::raw::OpDetWaveform& opdigit = dh.at(i);
       ::larlite::opdetwaveform lite_opdigit;
-      lite_opdigit.SetChannelNumber(opdigit_ptr->ChannelNumber());
-      lite_opdigit.SetTimeStamp(opdigit_ptr->TimeStamp());
+      lite_opdigit.SetChannelNumber(opdigit.ChannelNumber());
+      lite_opdigit.SetTimeStamp(opdigit.TimeStamp());
 
-      lite_opdigit.reserve((*opdigit_ptr).size());
-      for(auto const& adc : *opdigit_ptr)
+      lite_opdigit.reserve(opdigit.size());
+      for(auto const& adc : opdigit)
 	lite_opdigit.push_back(adc);
       
       lite_data->emplace_back(lite_opdigit);
     }  
   }
 
+  template <>
+  void ScannerAlgo::ScanData(art::Handle<std::vector< ::raw::OpDetWaveform> > const &dh,
+			     ::larlite::event_base* lite_dh)
+  {
+    ScanData( *(dh.product()), lite_dh );
+  }
 
   template <>
   void ScannerAlgo::ScanData(art::Handle< std::vector<::raw::Trigger> > const &dh,
@@ -760,7 +766,7 @@ namespace larlite {
   }
 
   template <>
-  void ScannerAlgo::ScanData(art::Handle<std::vector< ::recob::Hit> > const &dh,
+  void ScannerAlgo::ScanData(std::vector< ::recob::Hit> const &dh,
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;
@@ -768,28 +774,28 @@ namespace larlite {
     auto lite_data = (::larlite::event_hit*)lite_dh;
     //art::ServiceHandle<::geo::Geometry> geo;
 
-    for(size_t i=0; i<dh->size(); i++){
+    for(size_t i=0; i<dh.size(); i++){
       
-      art::Ptr<::recob::Hit> hit_ptr(dh,i);
+      const ::recob::Hit& hit = dh.at(i);
 
       //std::cout<<i<<" "<<hit_ptr.id().productIndex()<<std::endl;
 
       larlite::hit lite_hit;
-      lite_hit.set_rms(hit_ptr->RMS());
-      lite_hit.set_time_range(hit_ptr->StartTick(),hit_ptr->EndTick());
-      lite_hit.set_time_peak(hit_ptr->PeakTime(),hit_ptr->SigmaPeakTime());
-      lite_hit.set_amplitude(hit_ptr->PeakAmplitude(),hit_ptr->SigmaPeakAmplitude());
-      lite_hit.set_sumq(hit_ptr->SummedADC());
-      lite_hit.set_integral(hit_ptr->Integral(),hit_ptr->SigmaIntegral());
-      lite_hit.set_multiplicity(hit_ptr->Multiplicity());
-      lite_hit.set_local_index(hit_ptr->LocalIndex());
-      lite_hit.set_goodness(hit_ptr->GoodnessOfFit());
-      lite_hit.set_ndf(hit_ptr->DegreesOfFreedom());
-      lite_hit.set_channel(hit_ptr->Channel());
-      lite_hit.set_view((::larlite::geo::View_t)(hit_ptr->View()));
-      lite_hit.set_signal_type((::larlite::geo::SigType_t)(hit_ptr->SignalType()));
+      lite_hit.set_rms(hit.RMS());
+      lite_hit.set_time_range(hit.StartTick(),hit.EndTick());
+      lite_hit.set_time_peak(hit.PeakTime(),hit.SigmaPeakTime());
+      lite_hit.set_amplitude(hit.PeakAmplitude(),hit.SigmaPeakAmplitude());
+      lite_hit.set_sumq(hit.SummedADC());
+      lite_hit.set_integral(hit.Integral(),hit.SigmaIntegral());
+      lite_hit.set_multiplicity(hit.Multiplicity());
+      lite_hit.set_local_index(hit.LocalIndex());
+      lite_hit.set_goodness(hit.GoodnessOfFit());
+      lite_hit.set_ndf(hit.DegreesOfFreedom());
+      lite_hit.set_channel(hit.Channel());
+      lite_hit.set_view((::larlite::geo::View_t)(hit.View()));
+      lite_hit.set_signal_type((::larlite::geo::SigType_t)(hit.SignalType()));
 
-      auto const& wid = hit_ptr->WireID();
+      auto const& wid = hit.WireID();
       lite_hit.set_wire(::larlite::geo::WireID(wid.Cryostat,wid.TPC,wid.Plane,wid.Wire));
       
       // Store address map for downstream association
@@ -798,6 +804,14 @@ namespace larlite {
       lite_data->push_back(lite_hit);
     }
   }
+
+  template <>
+  void ScannerAlgo::ScanData(art::Handle<std::vector< ::recob::Hit> > const &dh,
+			     ::larlite::event_base* lite_dh)
+  { 
+    ScanData( *(dh.product()), lite_dh );
+  }
+  
 
   template <>
   void ScannerAlgo::ScanData(art::Handle<std::vector< ::recob::OpHit> > const &dh,
@@ -848,29 +862,28 @@ namespace larlite {
       //art::Ptr<::recob::OpFlash> flash_ptr(dh,i);
       const ::recob::OpFlash* flash_ptr = &dh.at(i);
 
-    /*   std::vector<double> pe_per_opdet; */
+      //std::vector<double> pe_per_opdet;
 
-    /*   //pe_per_opdet.reserve(geo->NOpChannels()); */
-    /*   //for(size_t j=0; j<geo->NOpChannels(); ++j){ */
-    /*   //  pe_per_opdet.push_back(flash_ptr->PE(j)); */
-    /*   //}     */
-
-    /*   pe_per_opdet.reserve((*(channel_set.rbegin()))); */
-    /*   double pe_larsoft = flash_ptr->TotalPE(); */
-    /*   double pe_larlite = 0.; */
-    /*   for(auto const& ch : channel_set) { */
-    /* 	pe_per_opdet.resize(ch+1); */
-    /* 	if(pe_larsoft > pe_larlite) { */
-    /* 	  pe_larlite += flash_ptr->PE(ch); */
-    /* 	  pe_per_opdet[ch] = flash_ptr->PE(ch); */
-    /* 	}else */
-    /* 	  pe_per_opdet[ch] = 0.; */
-    /*   } */
+      //pe_per_opdet.reserve(geo->NOpChannels());
+      //for(size_t j=0; j<geo->NOpChannels(); ++j){
+      //  pe_per_opdet.push_back(flash_ptr->PE(j));
+      //}
+      /* pe_per_opdet.reserve((*(channel_set.rbegin()))); */
+      /* double pe_larsoft = flash_ptr->TotalPE(); */
+      /* double pe_larlite = 0.; */
+      /* for(auto const& ch : channel_set) { */
+      /* 	pe_per_opdet.resize(ch+1); */
+      /* 	if(pe_larsoft > pe_larlite) { */
+      /* 	  pe_larlite += flash_ptr->PE(ch); */
+      /* 	  pe_per_opdet[ch] = flash_ptr->PE(ch); */
+      /* 	}else */
+      /* 	  pe_per_opdet[ch] = 0.; */
+      /* } */
       
-      ::larlite::opflash lite_flash( flash_ptr->Time(),
-    				     flash_ptr->TimeWidth(),
-    				     flash_ptr->AbsTime(),
-    				     flash_ptr->Frame(),
+      ::larlite::opflash lite_flash( flash_ptr->Time(), 
+				     flash_ptr->TimeWidth(), 
+				     flash_ptr->AbsTime(), 
+				     flash_ptr->Frame(),
     				     flash_ptr->PEs(),
     				     flash_ptr->InBeamFrame(),
     				     flash_ptr->OnBeamTime(),
@@ -883,11 +896,18 @@ namespace larlite {
     				     flash_ptr->WireWidths());
       
       //fPtrIndex_opflash[flash_ptr] = std::make_pair(lite_data->size(),name_index);
-
+      
       // save
-      lite_data->push_back(lite_flash);
+      lite_data->emplace_back(lite_flash);
     }
+    
+  }
 
+  template <>
+    void ScannerAlgo::ScanData(art::Handle< std::vector< ::recob::OpFlash > > const &dh,
+			       ::larlite::event_base* lite_dh)
+  {
+    ScanData( *(dh.product()), lite_dh );
   }
 
   template <>
